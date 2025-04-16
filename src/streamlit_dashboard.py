@@ -10,7 +10,7 @@ import threading
 import time
 import smtplib
 import kaleido
-import plotly
+import plotly.express as px
 from email.message import EmailMessage
 from io import StringIO
 
@@ -226,12 +226,17 @@ if st.session_state.trader is None:
                 st.error("❌ Failed to send email")
         
         # Display Session History Table
-        st.write("DEBUG - completed_runs:", st.session_state.get("completed_runs", "Not Found"))
+        # st.write("DEBUG - completed_runs:", st.session_state.get("completed_runs", "Not Found"))
 
         if st.session_state.completed_runs:
             st.subheader("📊 Session History")
             history_df = pd.DataFrame(st.session_state.completed_runs)
             st.dataframe(history_df)
+
+            st.subheader("📈 PnL Distribution")
+            pnl_values = [run['PnL'] for run in st.session_state.completed_runs]
+            fig = px.histogram(pnl_values, nbins=20, title="PnL Distribution Across All Sessions")
+            st.plotly_chart(fig)
 
         st.stop()
     else:

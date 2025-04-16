@@ -18,5 +18,15 @@
     "Cash Balance": 9003.27515883942,
     "Unrealized PnL": -0.0318751682886331,
     "Duration (s)": 60
+  },
+  {
+    "Timestamp": "2025-04-17 00:51:38",
+    "Symbols": "SOLUSDT",
+    "Initial Capital": 10000000.0,
+    "Final Portfolio Value": 9997839.417517005,
+    "PnL": -2160.5824829954654,
+    "Cash Balance": 9997839.417517005,
+    "Unrealized PnL": 0.0,
+    "Duration (s)": 60
   }
 ]
