@@ -1,0 +1,504 @@
+[
+    {
+        "timestamp": "2025-03-20 03:10:47",
+        "symbol": "BTCUSDT",
+        "source": "binance",
+        "price": 85680.3
+    },
+    {
+        "timestamp": "2025-03-20 03:10:48",
+        "symbol": "BTCUSDT",
+        "source": "coingecko",
+        "price": 85759.0
+    },
+    {
+        "timestamp": "2025-03-20 03:10:48",
+        "symbol": "BTCUSDT",
+        "source": "coinbase",
+        "price": 85724.635
+    },
+    {
+        "timestamp": "2025-03-20 03:19:59",
+        "symbol": "BTCUSDT",
+        "source": "binance",
+        "price": 85631.68
+    },
+    {
+        "timestamp": "2025-03-20 03:19:59",
+        "symbol": "BTCUSDT",
+        "source": "coingecko",
+        "price": 85624.0
+    },
+    {
+        "timestamp": "2025-03-20 03:20:00",
+        "symbol": "BTCUSDT",
+        "source": "coinbase",
+        "price": 85637.995
+    },
+    {
+        "timestamp": "2025-03-29 20:46:37",
+        "symbol": "BTCUSDT",
+        "source": "binance",
+        "price": 82537.66
+    },
+    {
+        "timestamp": "2025-03-29 20:46:37",
+        "symbol": "BTCUSDT",
+        "source": "coingecko",
+        "price": 82531.0
+    },
+    {
+        "timestamp": "2025-03-29 20:46:37",
+        "symbol": "BTCUSDT",
+        "source": "coinbase",
+        "price": 82506.815
+    },
+    {
+        "timestamp": "2025-03-29 21:00:43",
+        "symbol": "BTCUSDT",
+        "source": "binance",
+        "price": 82549.47
+    },
+    {
+        "timestamp": "2025-03-29 21:00:44",
+        "symbol": "BTCUSDT",
+        "source": "coingecko",
+        "price": 82520.0
+    },
+    {
+        "timestamp": "2025-03-29 21:00:44",
+        "symbol": "BTCUSDT",
+        "source": "coinbase",
+        "price": 82524.605
+    },
+    {
+        "timestamp": "2025-03-29 21:02:04",
+        "symbol": "SOLUSDT",
+        "source": "binance",
+        "price": 126.24
+    },
+    {
+        "timestamp": "2025-03-29 21:02:05",
+        "symbol": "SOLUSDT",
+        "source": "coinbase",
+        "price": null
+    },
+    {
+        "timestamp": "2025-03-29 21:02:20",
+        "symbol": "ETHUSDT",
+        "source": "binance",
+        "price": 1838.01
+    },
+    {
+        "timestamp": "2025-03-29 21:02:21",
+        "symbol": "ETHUSDT",
+        "source": "coingecko",
+        "price": 1842.45
+    },
+    {
+        "timestamp": "2025-03-29 21:02:22",
+        "symbol": "ETHUSDT",
+        "source": "coinbase",
+        "price": 1838.13
+    },
+    {
+        "timestamp": "2025-04-04 20:20:54",
+        "symbol": "BTCUSDT",
+        "source": "binance",
+        "price": 81873.12
+    },
+    {
+        "timestamp": "2025-04-04 20:20:54",
+        "symbol": "BTCUSDT",
+        "source": "coingecko",
+        "price": 82001.0
+    },
+    {
+        "timestamp": "2025-04-04 20:20:54",
+        "symbol": "BTCUSDT",
+        "source": "coinbase",
+        "price": 81901.535
+    },
+    {
+        "timestamp": "2025-04-04 20:36:55",
+        "symbol": "BTCUSDT",
+        "source": "binance",
+        "price": 83039.06
+    },
+    {
+        "timestamp": "2025-04-04 20:36:55",
+        "symbol": "BTCUSDT",
+        "source": "coingecko",
+        "price": 83111.0
+    },
+    {
+        "timestamp": "2025-04-04 20:36:55",
+        "symbol": "BTCUSDT",
+        "source": "coinbase",
+        "price": 82988.785
+    },
+    {
+        "timestamp": "2025-04-04 20:47:18",
+        "symbol": "BTCUSDT",
+        "source": "binance",
+        "price": 83552.04
+    },
+    {
+        "timestamp": "2025-04-04 20:47:18",
+        "symbol": "BTCUSDT",
+        "source": "coingecko",
+        "price": 83591.0
+    },
+    {
+        "timestamp": "2025-04-04 20:47:19",
+        "symbol": "BTCUSDT",
+        "source": "coinbase",
+        "price": 83571.32
+    },
+    {
+        "timestamp": "2025-04-04 21:25:32",
+        "symbol": "BTCUSDT",
+        "source": "binance",
+        "price": 83120.01
+    },
+    {
+        "timestamp": "2025-04-04 21:25:32",
+        "symbol": "BTCUSDT",
+        "source": "coingecko",
+        "price": 83052.0
+    },
+    {
+        "timestamp": "2025-04-04 21:25:33",
+        "symbol": "BTCUSDT",
+        "source": "coinbase",
+        "price": 82968.66
+    },
+    {
+        "timestamp": "2025-04-04 21:25:48",
+        "symbol": "BTCUSDT",
+        "source": "binance",
+        "price": 83131.38
+    },
+    {
+        "timestamp": "2025-04-04 21:25:48",
+        "symbol": "BTCUSDT",
+        "source": "coingecko",
+        "price": 83052.0
+    },
+    {
+        "timestamp": "2025-04-04 21:25:49",
+        "symbol": "BTCUSDT",
+        "source": "coinbase",
+        "price": 83020.24
+    },
+    {
+        "timestamp": "2025-04-04 21:25:54",
+        "symbol": "BTCUSDT",
+        "source": "binance",
+        "price": 83116.81
+    },
+    {
+        "timestamp": "2025-04-04 21:25:54",
+        "symbol": "BTCUSDT",
+        "source": "coingecko",
+        "price": 83052.0
+    },
+    {
+        "timestamp": "2025-04-04 21:25:55",
+        "symbol": "BTCUSDT",
+        "source": "coinbase",
+        "price": 83043.985
+    },
+    {
+        "timestamp": "2025-04-04 21:25:58",
+        "symbol": "BTCUSDT",
+        "source": "binance",
+        "price": 83080.24
+    },
+    {
+        "timestamp": "2025-04-04 21:25:58",
+        "symbol": "BTCUSDT",
+        "source": "coingecko",
+        "price": 83052.0
+    },
+    {
+        "timestamp": "2025-04-04 21:25:59",
+        "symbol": "BTCUSDT",
+        "source": "coinbase",
+        "price": 83094.725
+    },
+    {
+        "timestamp": "2025-04-04 21:26:02",
+        "symbol": "BTCUSDT",
+        "source": "binance",
+        "price": 83098.47
+    },
+    {
+        "timestamp": "2025-04-04 21:26:02",
+        "symbol": "BTCUSDT",
+        "source": "coingecko",
+        "price": 83052.0
+    },
+    {
+        "timestamp": "2025-04-04 21:26:03",
+        "symbol": "BTCUSDT",
+        "source": "coinbase",
+        "price": 83094.725
+    },
+    {
+        "timestamp": "2025-04-04 21:26:06",
+        "symbol": "BTCUSDT",
+        "source": "binance",
+        "price": 83140.0
+    },
+    {
+        "timestamp": "2025-04-04 21:26:07",
+        "symbol": "BTCUSDT",
+        "source": "coinbase",
+        "price": 83038.765
+    },
+    {
+        "timestamp": "2025-04-04 21:26:18",
+        "symbol": "BTCUSDT",
+        "source": "binance",
+        "price": 83165.99
+    },
+    {
+        "timestamp": "2025-04-04 21:26:18",
+        "symbol": "BTCUSDT",
+        "source": "coinbase",
+        "price": 83102.435
+    },
+    {
+        "timestamp": "2025-04-04 21:26:24",
+        "symbol": "BTCUSDT",
+        "source": "binance",
+        "price": 83215.88
+    },
+    {
+        "timestamp": "2025-04-04 21:26:25",
+        "symbol": "BTCUSDT",
+        "source": "coinbase",
+        "price": 83102.435
+    },
+    {
+        "timestamp": "2025-04-04 21:26:31",
+        "symbol": "BTCUSDT",
+        "source": "binance",
+        "price": 83206.0
+    },
+    {
+        "timestamp": "2025-04-04 21:26:32",
+        "symbol": "BTCUSDT",
+        "source": "coinbase",
+        "price": 83149.385
+    },
+    {
+        "timestamp": "2025-04-04 21:26:35",
+        "symbol": "BTCUSDT",
+        "source": "binance",
+        "price": 83143.49
+    },
+    {
+        "timestamp": "2025-04-04 21:26:36",
+        "symbol": "BTCUSDT",
+        "source": "coinbase",
+        "price": 83149.385
+    },
+    {
+        "timestamp": "2025-04-04 21:26:38",
+        "symbol": "BTCUSDT",
+        "source": "binance",
+        "price": 83109.63
+    },
+    {
+        "timestamp": "2025-04-04 21:26:39",
+        "symbol": "BTCUSDT",
+        "source": "coinbase",
+        "price": 83149.385
+    },
+    {
+        "timestamp": "2025-04-05 22:30:08",
+        "symbol": "BTCUSDT",
+        "source": "binance",
+        "price": 82750.0
+    },
+    {
+        "timestamp": "2025-04-05 22:30:09",
+        "symbol": "BTCUSDT",
+        "source": "coingecko",
+        "price": 82675.0
+    },
+    {
+        "timestamp": "2025-04-05 22:30:09",
+        "symbol": "BTCUSDT",
+        "source": "coinbase",
+        "price": 82714.495
+    },
+    {
+        "timestamp": "2025-04-05 23:19:20",
+        "symbol": "BTCUSDT",
+        "source": "binance",
+        "price": 82916.48
+    },
+    {
+        "timestamp": "2025-04-05 23:19:20",
+        "symbol": "BTCUSDT",
+        "source": "coingecko",
+        "price": 82914.0
+    },
+    {
+        "timestamp": "2025-04-05 23:19:21",
+        "symbol": "BTCUSDT",
+        "source": "coinbase",
+        "price": 82887.675
+    },
+    {
+        "timestamp": "2025-04-05 23:25:39",
+        "symbol": "BTCUSDT",
+        "source": "binance",
+        "price": 82869.26
+    },
+    {
+        "timestamp": "2025-04-05 23:25:39",
+        "symbol": "BTCUSDT",
+        "source": "coingecko",
+        "price": 82871.0
+    },
+    {
+        "timestamp": "2025-04-05 23:25:39",
+        "symbol": "BTCUSDT",
+        "source": "coinbase",
+        "price": 82831.345
+    },
+    {
+        "timestamp": "2025-04-05 23:28:10",
+        "symbol": "BTCUSDT",
+        "source": "binance",
+        "price": 82861.33
+    },
+    {
+        "timestamp": "2025-04-05 23:28:10",
+        "symbol": "BTCUSDT",
+        "source": "coingecko",
+        "price": 82848.0
+    },
+    {
+        "timestamp": "2025-04-05 23:28:11",
+        "symbol": "BTCUSDT",
+        "source": "coinbase",
+        "price": 82825.575
+    },
+    {
+        "timestamp": "2025-04-06 03:43:39",
+        "symbol": "ETHUSDT",
+        "source": "binance",
+        "price": 1794.81
+    },
+    {
+        "timestamp": "2025-04-06 03:43:39",
+        "symbol": "ETHUSDT",
+        "source": "coingecko",
+        "price": 1792.32
+    },
+    {
+        "timestamp": "2025-04-06 03:43:39",
+        "symbol": "ETHUSDT",
+        "source": "coinbase",
+        "price": 1794.085
+    },
+    {
+        "timestamp": "2025-04-06 03:44:23",
+        "symbol": "AAPL",
+        "source": "yahoo",
+        "price": 188.3800048828125
+    },
+    {
+        "timestamp": "2025-04-06 03:48:06",
+        "symbol": "BTCUSDT",
+        "source": "binance",
+        "price": 83013.05
+    },
+    {
+        "timestamp": "2025-04-06 03:48:06",
+        "symbol": "BTCUSDT",
+        "source": "coingecko",
+        "price": 83008.0
+    },
+    {
+        "timestamp": "2025-04-06 03:48:07",
+        "symbol": "BTCUSDT",
+        "source": "coinbase",
+        "price": 82979.965
+    },
+    {
+        "timestamp": "2025-04-06 03:48:32",
+        "symbol": "AAPL",
+        "source": "yahoo",
+        "price": 188.3800048828125
+    },
+    {
+        "timestamp": "2025-04-07 00:11:13",
+        "symbol": [
+            "BTCUSDT"
+        ],
+        "source": "binance",
+        "price": 79516.09
+    },
+    {
+        "timestamp": "2025-04-07 00:33:58",
+        "symbol": [
+            "BTCUSDT"
+        ],
+        "source": "binance",
+        "price": 79279.9
+    },
+    {
+        "timestamp": "2025-04-07 00:37:22",
+        "symbol": "BTCUSDT",
+        "source": "binance",
+        "price": 79195.38
+    },
+    {
+        "timestamp": "2025-04-07 00:37:23",
+        "symbol": "BTCUSDT",
+        "source": "coingecko",
+        "price": 78952.0
+    },
+    {
+        "timestamp": "2025-04-07 00:37:23",
+        "symbol": "BTCUSDT",
+        "source": "coinbase",
+        "price": 79117.615
+    },
+    {
+        "timestamp": "2025-04-07 00:37:35",
+        "symbol": "AAPL",
+        "source": "yahoo",
+        "price": 188.3800048828125
+    },
+    {
+        "timestamp": "2025-04-07 00:38:04",
+        "symbol": "AAPL",
+        "source": "yahoo",
+        "price": 188.3800048828125
+    },
+    {
+        "timestamp": "2025-04-07 00:38:05",
+        "symbol": "TSLA",
+        "source": "yahoo",
+        "price": 239.42999267578125
+    },
+    {
+        "timestamp": "2025-04-07 00:49:57",
+        "symbol": "AAPL",
+        "source": "yahoo",
+        "price": 188.3800048828125
+    },
+    {
+        "timestamp": "2025-04-07 00:49:58",
+        "symbol": "TSLA",
+        "source": "yahoo",
+        "price": 239.42999267578125
+    }
+]
