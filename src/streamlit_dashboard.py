@@ -26,18 +26,68 @@ from price_engine.data_sources.websocket_handler import start_price_feed
 
 
 
-SESSION_HISTORY_FILE = "session_history.json"
+SESSION_HISTORY_FILE = os.path.join(os.path.dirname(__file__), "session_history.json")
 
 def load_history():
-    if os.path.exists(SESSION_HISTORY_FILE):
-        with open(SESSION_HISTORY_FILE, "r") as f:
-            return json.load(f)
+    try:
+        if os.path.exists(SESSION_HISTORY_FILE):
+            with open(SESSION_HISTORY_FILE, "r") as f:
+                history = json.load(f)
+                # Validate loaded data is a list
+                return history if isinstance(history, list) else []
+    except Exception as e:
+        st.error(f"Error loading history: {e}")
     return []
 
 def save_history(history):
-    with open(SESSION_HISTORY_FILE, "w") as f:
-        json.dump(history, f, indent=2)
+    """Save session history to JSON file with better validation"""
+    try:
+        # Ensure directory exists
+        os.makedirs(os.path.dirname(SESSION_HISTORY_FILE), exist_ok=True)
+        
+        # Validate history data
+        if not isinstance(history, list):
+            st.error("History must be a list")
+            return False
+            
+        # Convert pandas Timestamps to strings if present
+        for item in history:
+            if 'Timestamp' in item and pd.notna(item['Timestamp']):
+                item['Timestamp'] = str(item['Timestamp'])
+        
+        with open(SESSION_HISTORY_FILE, 'w') as f:
+            json.dump(history, f, indent=2, default=str)  # Handles non-serializable objects
+        return True
+    except Exception as e:
+        st.error(f"Failed to save history: {str(e)}")
+        return False
 
+# In save_completed_session(), add validation:
+def save_completed_session(trader, symbols, initial_capital, runtime):
+    try:
+        summary = trader.get_portfolio_summary()
+        st.write("Debug - Trader Summary:", summary)  # Debug output
+        
+        session_info = {
+            "Timestamp": pd.Timestamp.now().strftime("%Y-%m-%d %H:%M:%S"),
+            "Symbols": ', '.join(symbols),
+            "Initial Capital": float(summary["initial_capital"]),
+            "Final Portfolio Value": float(summary["final_portfolio_value"]),
+            "PnL": float(summary["final_pnl"]),
+            "Cash Balance": float(summary["cash_balance"]),
+            "Unrealized PnL": float(summary["unrealized_pnl"]),
+            "Duration (s)": int(runtime)
+        }
+        
+        st.write("Debug - Session Info:", session_info)  # Debug output
+        
+        st.session_state.completed_runs.append(session_info)
+        if save_history(st.session_state.completed_runs):
+            st.success("Session saved successfully!")
+        else:
+            st.error("Failed to save session")
+    except Exception as e:
+        st.error(f"Error in save_completed_session: {str(e)}")
 
 
 # --- Fixed Email utility function ---
@@ -126,24 +176,15 @@ if st.sidebar.button("▶️ Start Trading") and st.session_state.trader is None
 if st.sidebar.button("⏹ Stop Trading"):
     if st.session_state.trader:
         st.session_state.trader.stop()
-        st.session_state.last_summary = st.session_state.trader.get_summary()
-        st.session_state.last_logs = st.session_state.trader.logs.copy()
-        st.session_state.last_timeline = st.session_state.trader.get_timeline().copy()
-
-        session_info = {
-            "Timestamp": pd.Timestamp.now().strftime("%Y-%m-%d %H:%M:%S"),
-            "Symbols": ', '.join(symbols),
-            "Initial Capital": initial_capital,
-            "Final Portfolio Value": st.session_state.last_summary["final_portfolio_value"],
-            "PnL": st.session_state.last_summary["final_pnl"],
-            "Duration (s)": runtime
-        }
-
-        st.session_state.completed_runs.append(session_info)
-        save_history(st.session_state.completed_runs)
+        save_completed_session(
+            st.session_state.trader, 
+            symbols, 
+            initial_capital, 
+            runtime
+        )
+        
         st.session_state.trader = None
         st.session_state.show_summary = True
-        st.success("✅ Trading stopped.")
 
 # Handle summary display after session ends
 if st.session_state.trader is None:
@@ -205,10 +246,23 @@ remaining = max(runtime - elapsed, 0)
 st.sidebar.metric("⏳ Time Remaining", f"{remaining} sec")
 
 # Auto-close if trader ends silently
-if not trader.is_active:
+if not trader.is_active and st.session_state.trader:
+    st.session_state.last_summary = trader.get_portfolio_summary()
+    st.session_state.last_logs = trader.get_logs()
+    st.session_state.last_timeline = trader.get_pnl_data()
+    save_completed_session(
+        trader,
+        symbols,
+        initial_capital,
+        runtime
+    )
     st.session_state.trader = None
     st.session_state.show_summary = True
     st.rerun()
+
+if time.time() - getattr(trader, 'last_save_time', 0) > 300:  # Auto-save every 5 minutes
+    save_history(st.session_state.completed_runs)
+    trader.last_save_time = time.time()
 
 # --- Main UI ---
 st.title("📊 Real-Time Trading Dashboard")

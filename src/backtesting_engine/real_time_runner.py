@@ -105,6 +105,9 @@ class RealTimeTrader:
 
         self.cash_balance += (position["size"] * price) + pnl
         del self.positions[symbol]
+    
+    def get_trade_count(self):
+        return len([log for log in self.logs if "Action" in log])
 
     def calculate_unrealized_pnl(self):
         total = 0
@@ -123,7 +126,8 @@ class RealTimeTrader:
             "cash_balance": self.cash_balance,
             "unrealized_pnl": self.calculate_unrealized_pnl(),
             "final_pnl": net_pnl,
-            "final_portfolio_value": final_balance
+            "final_portfolio_value": final_balance,
+            "position_count": len(self.positions) 
         }
 
     def get_positions(self):

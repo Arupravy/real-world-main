@@ -1,0 +1,22 @@
+[
+  {
+    "Timestamp": "2025-04-17 00:27:26",
+    "Symbols": "SOLUSDT",
+    "Initial Capital": 100000.0,
+    "Final Portfolio Value": 89950.64286223779,
+    "PnL": -10049.357137762214,
+    "Cash Balance": 89950.64286223779,
+    "Unrealized PnL": 0.0,
+    "Duration (s)": 60
+  },
+  {
+    "Timestamp": "2025-04-17 00:31:53",
+    "Symbols": "BTCUSDT, ETHUSDT",
+    "Initial Capital": 10000.0,
+    "Final Portfolio Value": 9003.243283671132,
+    "PnL": -996.7567163288677,
+    "Cash Balance": 9003.27515883942,
+    "Unrealized PnL": -0.0318751682886331,
+    "Duration (s)": 60
+  }
+]
