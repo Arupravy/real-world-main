@@ -1,44 +1,35 @@
-# Price Engine
+python src/main.py --mode historical --symbol AAPL MSFT TSLA --asset-type stock --from 2024-01-01 --to 2024-01-10
 
-A Python-based price engine that aggregates cryptocurrency prices from multiple sources (e.g., Binance, CoinGecko, Coinbase) and provides live and historical price data.
+python src/main.py --mode live --symbol AAPL TSLA --asset-type stock
 
-## Features
-- Fetch live prices from multiple sources.
-- Fetch historical prices for a specified date range.
-- Calculate weighted average prices.
-- Display prices in a well-formatted table.
+python src/main.py --mode historical --symbol BTCUSDT ETHUSDT --asset-type crypto --from 2024-01-01 --to 2024-01-10
 
-## Usage
+python src/main.py --mode ws-live --symbol BTCUSDT --asset-type crypto
 
-### Live Mode
-Fetch and display live prices:
-```bash
-python src/main.py --mode live
-```
+python src/main.py --mode ws-live --symbol BTCUSDT ETHUSDT --asset-type crypto
+
+python src/main.py --mode api-live --symbol ETHUSDT --asset-type crypto
 
 
-### Historical Mode
-Fetch and display historical prices for a date range:
 
-```bash
-python src/main.py --mode historical --from 2025-03-19 --to 2025-03-20
+python src/backtesting_engine/backtest_runner.py --symbols AAPL --allocations 100 --start 2020-01-01 --end 2024-01-01 --strategy mean_reversion --asset_type stock
 
-```
-## Installation
-
-### Clone the repository:
-
-```bash
-git clone https://github.com/arupravy/price-engine.git
-
-```
-
-### Install dependencies:
-
-```bash
-pip install -r requirements.txt
-```
-## Contributing
+python src/backtesting_engine/backtest_runner.py --symbols TSLA,AAPL,MSFT --allocations 40,30,30 --start 2020-01-01 --end 2024-01-01 --strategy mean_reversion --asset_type stock
 
 
-Contributions are welcome! Please open an issue or submit a pull request.
+
+python src/backtesting_engine/backtest_runner.py --symbols NVDA,^GSPC,INTC --allocations 40,30,30 --start 2019-01-01 --end 2021-01-01 --strategy mean_reversion --asset_type stock
+
+PS C:\real-world-main> python src/backtesting_engine/backtest_runner.py --symbols BTCUSDT,ETHUSDT --allocations 60,40 --start 2020-01-01 --end 2025-01-01 --strategy mean_reversion --asset_type crypto
+
+
+
+
+
+python src/main.py --mode live-plot --symbol BTCUSDT ETHUSDT DOGEUSDT --asset-type crypto
+
+
+python src/main.py --mode stream-to-csv --symbol BTCUSDT ETHUSDT DOGEUSDT --asset-type crypto
+
+
+streamlit run src/streamlit_dashboard.py
