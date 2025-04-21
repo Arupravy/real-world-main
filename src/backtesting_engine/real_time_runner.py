@@ -26,6 +26,7 @@ class RealTimeTrader:
         self.cooldown_seconds = 1
         self.min_price_change = 0.05
         self.is_active = True
+        self.is_running = False 
 
     def on_price_update(self, symbol, price):
         if not self.is_active:
@@ -161,3 +162,21 @@ class RealTimeTrader:
 
     def is_running(self):
         return self.is_active
+    
+    def stop(self):
+        """Gracefully stop the trading session"""
+        with self.lock:
+            self.is_active = False
+            # Optional: Force close all open positions
+            for symbol in list(self.positions.keys()):
+                if self.data[symbol]:
+                    self.exit_position(symbol, self.data[symbol][-1]['price'])
+    
+    def validate_state(self):
+        with self.lock:
+            return {
+                'is_active': self.is_active,
+                'is_running': self.is_running,
+                'positions': len(self.positions),
+                'last_update': time.time() - self.start_time
+            }
