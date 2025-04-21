@@ -1,3 +1,16 @@
+streamlit
+pandas
+numpy
+scipy
+python-decouple
+yfinance
+ccxt
+websockets
+torch
+plotly
+kaleido
 requests
 python-dotenv
-sqlite3
+colorama
+tabulate
+pillow
