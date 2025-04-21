@@ -252,37 +252,37 @@ def display_symbol_performance(history_df):
     tab1, tab2 = st.tabs(["📈 Performance Metrics", "💰 Capital Efficiency"])
     
     with tab1:
+        # --- PnL Distribution ---
         st.markdown("### PnL Distribution by Symbol")
-        col1, col2 = st.columns([2, 1], gap="large")
+        fig1 = px.box(
+            analysis_df,
+            x='Symbols',
+            y='PnL',
+            color='Symbols',
+            points=False,
+            height=400
+        )
+        fig1.update_layout(
+            showlegend=False,
+            yaxis_title="Profit/Loss ($)",
+            xaxis_title="",
+            margin=dict(t=30, b=30, l=20, r=20)
+        )
+        st.plotly_chart(fig1, use_container_width=True)
         
-        with col1:
-            fig1 = px.box(
-                analysis_df,
-                x='Symbols',
-                y='PnL',
-                color='Symbols',
-                points=False,
-                height=400
-            )
-            fig1.update_layout(
-                showlegend=False,
-                yaxis_title="Profit/Loss ($)",
-                xaxis_title="",
-                margin=dict(t=30))
-            st.plotly_chart(fig1, use_container_width=True)
-        
-        with col2:
-            st.markdown("### Key Metrics")
-            st.dataframe(
-                symbol_stats[['Symbols', 'Trade_Count', 'Avg_PnL', 'Win_Rate']]
-                .sort_values('Avg_PnL', ascending=False)
-                .style.format({
-                    'Avg_PnL': '${:,.2f}',
-                    'Win_Rate': '{:.1f}%'
-                }),
-                height=400,
-                use_container_width=True
-            )
+        # --- Key Metrics ---
+        st.markdown("### Key Performance Metrics")
+        st.dataframe(
+            symbol_stats[['Symbols', 'Trade_Count', 'Avg_PnL', 'Win_Rate', 'Avg_Return_Pct']]
+            .sort_values('Avg_PnL', ascending=False)
+            .style.format({
+                'Avg_PnL': '${:,.2f}',
+                'Win_Rate': '{:.1f}%',
+                'Avg_Return_Pct': '{:.2f}%'
+            }),
+            height=300,
+            use_container_width=True
+        )
     
     with tab2:
         st.markdown("### Performance vs Capital Allocation")
