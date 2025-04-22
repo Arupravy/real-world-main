@@ -2368,5 +2368,15 @@
     "Cash Balance": 100000.0,
     "Unrealized PnL": 0.0,
     "Duration (s)": 30
+  },
+  {
+    "Timestamp": "2025-04-22 18:28:09",
+    "Symbols": "BTCUSDT, ETHUSDT",
+    "Initial Capital": 10000.0,
+    "Final Portfolio Value": 9091.416839664858,
+    "PnL": -908.5831603351417,
+    "Cash Balance": 9091.422384194742,
+    "Unrealized PnL": -0.005544529883332859,
+    "Duration (s)": 10
   }
 ]
