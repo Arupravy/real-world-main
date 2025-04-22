@@ -2288,5 +2288,85 @@
     "Cash Balance": 9100.094444972212,
     "Unrealized PnL": 0.604858306308465,
     "Duration (s)": 20
+  },
+  {
+    "Timestamp": "2025-04-22 03:50:44",
+    "Symbols": "BTCUSDT, ETHUSDT",
+    "Initial Capital": 10000.0,
+    "Final Portfolio Value": 9000.000206896575,
+    "PnL": -999.999793103425,
+    "Cash Balance": 9000.000206896575,
+    "Unrealized PnL": 0.0,
+    "Duration (s)": 12
+  },
+  {
+    "Timestamp": "2025-04-22 03:51:59",
+    "Symbols": "SOLUSDT",
+    "Initial Capital": 10000.0,
+    "Final Portfolio Value": 10000.14693997502,
+    "PnL": 0.14693997502035927,
+    "Cash Balance": 10000.14693997502,
+    "Unrealized PnL": 0.0,
+    "Duration (s)": 12
+  },
+  {
+    "Timestamp": "2025-04-22 04:17:10",
+    "Symbols": "BTCUSDT, ETHUSDT",
+    "Initial Capital": 10000.0,
+    "Final Portfolio Value": 10001.20230167862,
+    "PnL": 1.2023016786206426,
+    "Cash Balance": 10001.20230167862,
+    "Unrealized PnL": 0.0,
+    "Duration (s)": 300
+  },
+  {
+    "Timestamp": "2025-04-22 04:21:42",
+    "Symbols": "BTCUSDT, ETHUSDT",
+    "Initial Capital": 100000.0,
+    "Final Portfolio Value": 100001.87964404402,
+    "PnL": 1.8796440440200968,
+    "Cash Balance": 100001.87964404402,
+    "Unrealized PnL": 0.0,
+    "Duration (s)": 30
+  },
+  {
+    "Timestamp": "2025-04-22 04:25:52",
+    "Symbols": "ETHUSDT",
+    "Initial Capital": 10000.0,
+    "Final Portfolio Value": 10000.0,
+    "PnL": 0.0,
+    "Cash Balance": 10000.0,
+    "Unrealized PnL": 0.0,
+    "Duration (s)": 300
+  },
+  {
+    "Timestamp": "2025-04-22 04:26:35",
+    "Symbols": "ETHUSDT",
+    "Initial Capital": 100000.0,
+    "Final Portfolio Value": 89999.0874694405,
+    "PnL": -10000.912530559493,
+    "Cash Balance": 89999.0874694405,
+    "Unrealized PnL": 0.0,
+    "Duration (s)": 30
+  },
+  {
+    "Timestamp": "2025-04-22 04:35:11",
+    "Symbols": "BTCUSDT, ETHUSDT",
+    "Initial Capital": 100000.0,
+    "Final Portfolio Value": 99994.1880496344,
+    "PnL": -5.811950365605298,
+    "Cash Balance": 99994.1880496344,
+    "Unrealized PnL": 0.0,
+    "Duration (s)": 30
+  },
+  {
+    "Timestamp": "2025-04-22 04:45:10",
+    "Symbols": "ETHUSDT",
+    "Initial Capital": 100000.0,
+    "Final Portfolio Value": 100000.0,
+    "PnL": 0.0,
+    "Cash Balance": 100000.0,
+    "Unrealized PnL": 0.0,
+    "Duration (s)": 30
   }
 ]
