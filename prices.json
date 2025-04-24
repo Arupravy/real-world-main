@@ -500,5 +500,35 @@
         "symbol": "TSLA",
         "source": "yahoo",
         "price": 239.42999267578125
+    },
+    {
+        "timestamp": "2025-04-24 07:13:16",
+        "symbol": "AAPL",
+        "source": "yahoo",
+        "price": 204.60000610351562
+    },
+    {
+        "timestamp": "2025-04-24 07:13:16",
+        "symbol": "TSLA",
+        "source": "yahoo",
+        "price": 250.74000549316406
+    },
+    {
+        "timestamp": "2025-04-24 07:13:37",
+        "symbol": "ETHUSDT",
+        "source": "binance",
+        "price": 1793.75
+    },
+    {
+        "timestamp": "2025-04-24 07:13:37",
+        "symbol": "ETHUSDT",
+        "source": "coingecko",
+        "price": 1789.52
+    },
+    {
+        "timestamp": "2025-04-24 07:13:38",
+        "symbol": "ETHUSDT",
+        "source": "coinbase",
+        "price": 1795.535
     }
 ]

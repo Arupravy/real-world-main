@@ -577,7 +577,7 @@ if st.session_state.show_summary:
         
         #Sentiment
         st.markdown("---")
-        news_data = fetch_marketaux_news(symbols="A,ETH", limit=2)
+        news_data = fetch_marketaux_news(symbols="TSLA,BTC", limit=3)
         for article in news_data:
             title = article.get("title")
             sentiment = get_sentiment(title)
