@@ -6,6 +6,7 @@ python-decouple
 yfinance
 ccxt
 websockets
+websocket-client
 torch
 plotly
 kaleido
