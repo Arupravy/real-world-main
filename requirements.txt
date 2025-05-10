@@ -4,11 +4,10 @@ numpy
 scipy
 python-decouple
 yfinance
-ccxt
 websockets
 websocket-client
 ta
-torch
+nltk
 plotly
 kaleido
 requests
