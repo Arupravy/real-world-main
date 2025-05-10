@@ -2688,5 +2688,575 @@
     "Cash Balance": 73175.64226802846,
     "Unrealized PnL": 1.4816845858797851,
     "Duration (s)": 300
+  },
+  {
+    "Timestamp": "2025-05-06 02:16:44",
+    "Symbols": "BTCUSDT",
+    "Initial Capital": 98562.0,
+    "Final Portfolio Value": 93637.75769120829,
+    "PnL": -4924.242308791712,
+    "Cash Balance": 93637.75716695882,
+    "Unrealized PnL": 0.0005242494621088193,
+    "Duration (s)": 300
+  },
+  {
+    "Timestamp": "2025-05-06 02:23:39",
+    "Symbols": "BNBUSDT",
+    "Initial Capital": 98562.0,
+    "Final Portfolio Value": 103492.1357547438,
+    "PnL": 4930.135754743795,
+    "Cash Balance": 103491.31168944616,
+    "Unrealized PnL": 0.8240652976436896,
+    "Duration (s)": 300
+  },
+  {
+    "Timestamp": "2025-05-06 02:30:10",
+    "Symbols": "BTCUSDT, ETHUSDT, SOLUSDT, BNBUSDT",
+    "Initial Capital": 1000000.0,
+    "Final Portfolio Value": 900286.8265674595,
+    "PnL": -99713.1734325405,
+    "Cash Balance": 900249.8101066173,
+    "Unrealized PnL": 37.01646084220476,
+    "Duration (s)": 300
+  },
+  {
+    "Timestamp": "2025-05-06 02:37:38",
+    "Symbols": "BTCUSDT, ETHUSDT, SOLUSDT",
+    "Initial Capital": 1000000.0,
+    "Final Portfolio Value": 1149845.8491389584,
+    "PnL": 149845.84913895838,
+    "Cash Balance": 1149732.8760746,
+    "Unrealized PnL": 112.9730643584539,
+    "Duration (s)": 300
+  },
+  {
+    "Timestamp": "2025-05-06 14:29:44",
+    "Symbols": "BTCUSDT",
+    "Initial Capital": 99899.0,
+    "Final Portfolio Value": 99899.61213054761,
+    "PnL": 0.6121305476117413,
+    "Cash Balance": 99899.61213054761,
+    "Unrealized PnL": 0.0,
+    "Duration (s)": 300
+  },
+  {
+    "Timestamp": "2025-05-06 15:43:46",
+    "Symbols": "ETHUSDT",
+    "Initial Capital": 99899.0,
+    "Final Portfolio Value": 94904.79740599282,
+    "PnL": -4994.202594007176,
+    "Cash Balance": 94904.81650366102,
+    "Unrealized PnL": -0.01909766819622662,
+    "Duration (s)": 300
+  },
+  {
+    "Timestamp": "2025-05-06 16:03:12",
+    "Symbols": "ETHUSDT, SOLUSDT",
+    "Initial Capital": 10000.0,
+    "Final Portfolio Value": 10499.966700573099,
+    "PnL": 499.96670057309893,
+    "Cash Balance": 10499.966700573099,
+    "Unrealized PnL": 0.0,
+    "Duration (s)": 300
+  },
+  {
+    "Timestamp": "2025-05-06 17:57:39",
+    "Symbols": "BTCUSDT, ETHUSDT",
+    "Initial Capital": 10000.0,
+    "Final Portfolio Value": 10499.858257399967,
+    "PnL": 499.85825739996653,
+    "Cash Balance": 10499.858257399967,
+    "Unrealized PnL": 0.0,
+    "Duration (s)": 300
+  },
+  {
+    "Timestamp": "2025-05-06 18:44:01",
+    "Symbols": "BTCUSDT",
+    "Initial Capital": 1000000.0,
+    "Final Portfolio Value": 1000000.0,
+    "PnL": 0.0,
+    "Cash Balance": 1000000.0,
+    "Unrealized PnL": 0.0,
+    "Duration (s)": 300
+  },
+  {
+    "Timestamp": "2025-05-06 19:02:38",
+    "Symbols": "BTCUSDT",
+    "Initial Capital": 1000000.0,
+    "Final Portfolio Value": 1000000.0,
+    "PnL": 0.0,
+    "Cash Balance": 1000000.0,
+    "Unrealized PnL": 0.0,
+    "Duration (s)": 600
+  },
+  {
+    "Timestamp": "2025-05-06 19:20:38",
+    "Symbols": "BTCUSDT",
+    "Initial Capital": 99999.0,
+    "Final Portfolio Value": 100010.81189695561,
+    "PnL": 11.811896955608972,
+    "Cash Balance": 100010.81189695561,
+    "Unrealized PnL": 0.0,
+    "Duration (s)": 600
+  },
+  {
+    "Timestamp": "2025-05-06 19:42:19",
+    "Symbols": "BTCUSDT, BNBUSDT, SOLUSDT",
+    "Initial Capital": 99999.0,
+    "Final Portfolio Value": 90016.60625304448,
+    "PnL": -9982.393746955524,
+    "Cash Balance": 90015.70825543893,
+    "Unrealized PnL": 0.8979976055429653,
+    "Duration (s)": 1500
+  },
+  {
+    "Timestamp": "2025-05-06 21:03:51",
+    "Symbols": "BTCUSDT, ETHUSDT",
+    "Initial Capital": 1000000.0,
+    "Final Portfolio Value": 900071.0953062671,
+    "PnL": -99928.90469373285,
+    "Cash Balance": 900080.1000975162,
+    "Unrealized PnL": -9.004791249102025,
+    "Duration (s)": 600
+  },
+  {
+    "Timestamp": "2025-05-06 21:24:52",
+    "Symbols": "BTCUSDT",
+    "Initial Capital": 10000.0,
+    "Final Portfolio Value": 11000.14145427234,
+    "PnL": 1000.1414542723396,
+    "Cash Balance": 11000.207481646294,
+    "Unrealized PnL": -0.06602737395341805,
+    "Duration (s)": 600
+  },
+  {
+    "Timestamp": "2025-05-06 21:46:09",
+    "Symbols": "BTCUSDT",
+    "Initial Capital": 1000000.0,
+    "Final Portfolio Value": 1000000.0,
+    "PnL": 0.0,
+    "Cash Balance": 1000000.0,
+    "Unrealized PnL": 0.0,
+    "Duration (s)": 600
+  },
+  {
+    "Timestamp": "2025-05-06 22:27:32",
+    "Symbols": "ETHUSDT",
+    "Initial Capital": 10000000.0,
+    "Final Portfolio Value": 10997967.543445984,
+    "PnL": 997967.5434459839,
+    "Cash Balance": 10998001.57537345,
+    "Unrealized PnL": -34.031927465909384,
+    "Duration (s)": 1800
+  },
+  {
+    "Timestamp": "2025-05-06 23:05:24",
+    "Symbols": "SOLUSDT",
+    "Initial Capital": 70000.0,
+    "Final Portfolio Value": 34927.0452655735,
+    "PnL": -35072.9547344265,
+    "Cash Balance": 34951.26147944411,
+    "Unrealized PnL": -24.216213870610442,
+    "Duration (s)": 1500
+  },
+  {
+    "Timestamp": "2025-05-06 23:49:24",
+    "Symbols": "BNBUSDT",
+    "Initial Capital": 70000.0,
+    "Final Portfolio Value": 70000.58359595151,
+    "PnL": 0.5835959515097784,
+    "Cash Balance": 70000.58359595151,
+    "Unrealized PnL": 0.0,
+    "Duration (s)": 499
+  },
+  {
+    "Timestamp": "2025-05-07 00:05:55",
+    "Symbols": "BTCUSDT, ETHUSDT, SOLUSDT, BNBUSDT",
+    "Initial Capital": 10000002.0,
+    "Final Portfolio Value": 7373578.89766702,
+    "PnL": -2626423.1023329804,
+    "Cash Balance": 7375063.55469216,
+    "Unrealized PnL": -1484.657025141008,
+    "Duration (s)": 589
+  },
+  {
+    "Timestamp": "2025-05-07 01:13:30",
+    "Symbols": "BTCUSDT",
+    "Initial Capital": 100000.0,
+    "Final Portfolio Value": 97000.93826670089,
+    "PnL": -2999.0617332991096,
+    "Cash Balance": 97000.76823298605,
+    "Unrealized PnL": 0.17003371483425705,
+    "Duration (s)": 600
+  },
+  {
+    "Timestamp": "2025-05-07 01:44:47",
+    "Symbols": "BTCUSDT, ETHUSDT",
+    "Initial Capital": 100000.0,
+    "Final Portfolio Value": 99996.20455539932,
+    "PnL": -3.7954446006770013,
+    "Cash Balance": 99996.20455539932,
+    "Unrealized PnL": 0.0,
+    "Duration (s)": 600
+  },
+  {
+    "Timestamp": "2025-05-07 02:21:21",
+    "Symbols": "BTCUSDT, ETHUSDT",
+    "Initial Capital": 100000.0,
+    "Final Portfolio Value": 100000.0,
+    "PnL": 0.0,
+    "Cash Balance": 100000.0,
+    "Unrealized PnL": 0.0,
+    "Duration (s)": 700
+  },
+  {
+    "Timestamp": "2025-05-07 03:00:06",
+    "Symbols": "BTCUSDT, ETHUSDT",
+    "Initial Capital": 10000.0,
+    "Final Portfolio Value": 9418.336242778225,
+    "PnL": -581.6637572217751,
+    "Cash Balance": 9418.465213426172,
+    "Unrealized PnL": -0.12897064794656685,
+    "Duration (s)": 300
+  },
+  {
+    "Timestamp": "2025-05-07 03:32:19",
+    "Symbols": "ETHUSDT",
+    "Initial Capital": 10000.0,
+    "Final Portfolio Value": 10500.869859488015,
+    "PnL": 500.8698594880152,
+    "Cash Balance": 10500.799736180988,
+    "Unrealized PnL": 0.07012330702628095,
+    "Duration (s)": 600
+  },
+  {
+    "Timestamp": "2025-05-07 03:38:55",
+    "Symbols": "BTCUSDT, ETHUSDT",
+    "Initial Capital": 10000000.0,
+    "Final Portfolio Value": 20952122.195946738,
+    "PnL": 10952122.195946738,
+    "Cash Balance": 20943641.55798075,
+    "Unrealized PnL": 8480.637965988226,
+    "Duration (s)": 300
+  },
+  {
+    "Timestamp": "2025-05-07 18:24:55",
+    "Symbols": "BTCUSDT",
+    "Initial Capital": 10000.0,
+    "Final Portfolio Value": 5001.374069135476,
+    "PnL": -4998.625930864524,
+    "Cash Balance": 5001.374069135476,
+    "Unrealized PnL": 0.0,
+    "Duration (s)": 300
+  },
+  {
+    "Timestamp": "2025-05-07 18:39:56",
+    "Symbols": "BTCUSDT",
+    "Initial Capital": 10000000.0,
+    "Final Portfolio Value": 19009759.266078155,
+    "PnL": 9009759.266078155,
+    "Cash Balance": 19007316.441064313,
+    "Unrealized PnL": 2442.8250138418366,
+    "Duration (s)": 600
+  },
+  {
+    "Timestamp": "2025-05-07 19:00:37",
+    "Symbols": "ETHUSDT",
+    "Initial Capital": 10000000.0,
+    "Final Portfolio Value": 1000438.5855057556,
+    "PnL": -8999561.414494244,
+    "Cash Balance": 1000438.5855057556,
+    "Unrealized PnL": 0.0,
+    "Duration (s)": 600
+  },
+  {
+    "Timestamp": "2025-05-07 19:22:21",
+    "Symbols": "ETHUSDT, BTCUSDT",
+    "Initial Capital": 10000000.0,
+    "Final Portfolio Value": 19092539.06309192,
+    "PnL": 9092539.063091919,
+    "Cash Balance": 19088332.404408034,
+    "Unrealized PnL": 4206.658683885168,
+    "Duration (s)": 600
+  },
+  {
+    "Timestamp": "2025-05-08 01:46:00",
+    "Symbols": "BTCUSDT, ETHUSDT",
+    "Initial Capital": 10000.0,
+    "Final Portfolio Value": 66577.09465674523,
+    "PnL": 56577.094656745234,
+    "Cash Balance": 66577.09465674523,
+    "Unrealized PnL": 0.0,
+    "Duration (s)": 300
+  },
+  {
+    "Timestamp": "2025-05-08 01:56:41",
+    "Symbols": "BTCUSDT, ETHUSDT",
+    "Initial Capital": 10000.0,
+    "Final Portfolio Value": 1.116054982182416,
+    "PnL": -9998.883945017818,
+    "Cash Balance": 0.0,
+    "Unrealized PnL": 1.116054982182416,
+    "Duration (s)": 300
+  },
+  {
+    "Timestamp": "2025-05-08 02:09:27",
+    "Symbols": "BTCUSDT, ETHUSDT",
+    "Initial Capital": 10000.0,
+    "Final Portfolio Value": 0.0,
+    "PnL": -10000.0,
+    "Cash Balance": 0.0,
+    "Unrealized PnL": 0.0,
+    "Duration (s)": 300
+  },
+  {
+    "Timestamp": "2025-05-08 02:23:21",
+    "Symbols": "BTCUSDT, ETHUSDT",
+    "Initial Capital": 10000.0,
+    "Final Portfolio Value": 0.0,
+    "PnL": -10000.0,
+    "Cash Balance": 0.0,
+    "Unrealized PnL": 0.0,
+    "Duration (s)": 300
+  },
+  {
+    "Timestamp": "2025-05-08 02:32:15",
+    "Symbols": "BTCUSDT, ETHUSDT",
+    "Initial Capital": 1000.0,
+    "Final Portfolio Value": 1022.5458110154914,
+    "PnL": 22.54581101549138,
+    "Cash Balance": 1022.5458110154914,
+    "Unrealized PnL": 0.0,
+    "Duration (s)": 300
+  },
+  {
+    "Timestamp": "2025-05-08 02:48:01",
+    "Symbols": "BTCUSDT, ETHUSDT",
+    "Initial Capital": 10000.0,
+    "Final Portfolio Value": 0.0,
+    "PnL": -10000.0,
+    "Cash Balance": 0.0,
+    "Unrealized PnL": 0.0,
+    "Duration (s)": 300
+  },
+  {
+    "Timestamp": "2025-05-08 04:15:16",
+    "Symbols": "BTCUSDT, ETHUSDT",
+    "Initial Capital": 10000.0,
+    "Final Portfolio Value": 28601.27399133265,
+    "PnL": 18601.27399133265,
+    "Cash Balance": 28967.175151136165,
+    "Unrealized PnL": -365.90115980351254,
+    "Duration (s)": 300
+  },
+  {
+    "Timestamp": "2025-05-08 10:30:22",
+    "Symbols": "BTCUSDT, ETHUSDT",
+    "Initial Capital": 1000000.0,
+    "Final Portfolio Value": -2107265696.2247674,
+    "PnL": -2108265696.2247674,
+    "Cash Balance": -2107265696.2247674,
+    "Unrealized PnL": 0.0,
+    "Duration (s)": 2000
+  },
+  {
+    "Timestamp": "2025-05-08 11:14:01",
+    "Symbols": "BTCUSDT, ETHUSDT, SOLUSDT",
+    "Initial Capital": 100000.0,
+    "Final Portfolio Value": 13264933814.40736,
+    "PnL": 13264833814.40736,
+    "Cash Balance": 13059810861.581997,
+    "Unrealized PnL": 205122952.8253634,
+    "Duration (s)": 1800
+  },
+  {
+    "Timestamp": "2025-05-08 12:12:53",
+    "Symbols": "BTCUSDT, ETHUSDT",
+    "Initial Capital": 10000.0,
+    "Final Portfolio Value": 10060.818349212517,
+    "PnL": 60.818349212517205,
+    "Cash Balance": 10060.818349212517,
+    "Unrealized PnL": 0.0,
+    "Duration (s)": 600
+  },
+  {
+    "Timestamp": "2025-05-08 13:01:44",
+    "Symbols": "BTCUSDT",
+    "Initial Capital": 100000.0,
+    "Final Portfolio Value": -0.010099025335554629,
+    "PnL": -100000.01009902534,
+    "Cash Balance": 0.0,
+    "Unrealized PnL": -0.010099025335554629,
+    "Duration (s)": 896
+  },
+  {
+    "Timestamp": "2025-05-08 13:53:18",
+    "Symbols": "BTCUSDT, ETHUSDT",
+    "Initial Capital": 98741.0,
+    "Final Portfolio Value": 98739.2929968501,
+    "PnL": -1.707003149902448,
+    "Cash Balance": 98739.2929968501,
+    "Unrealized PnL": 0.0,
+    "Duration (s)": 600
+  },
+  {
+    "Timestamp": "2025-05-08 14:17:08",
+    "Symbols": "BTCUSDT, ETHUSDT",
+    "Initial Capital": 10000.0,
+    "Final Portfolio Value": 33820.95670561849,
+    "PnL": 23820.95670561849,
+    "Cash Balance": 33820.95670561849,
+    "Unrealized PnL": 0.0,
+    "Duration (s)": 650
+  },
+  {
+    "Timestamp": "2025-05-08 17:50:16",
+    "Symbols": "BTCUSDT, ETHUSDT, BNBUSDT, SOLUSDT",
+    "Initial Capital": 67890.0,
+    "Final Portfolio Value": 149661.85329015006,
+    "PnL": 81771.85329015006,
+    "Cash Balance": 148955.69296793238,
+    "Unrealized PnL": 706.1603222176835,
+    "Duration (s)": 300
+  },
+  {
+    "Timestamp": "2025-05-08 23:10:26",
+    "Symbols": "BTCUSDT, BNBUSDT",
+    "Initial Capital": 1000000.0,
+    "Final Portfolio Value": 1995580.7375003037,
+    "PnL": 995580.7375003037,
+    "Cash Balance": 1995580.7375003037,
+    "Unrealized PnL": 0.0,
+    "Duration (s)": 658
+  },
+  {
+    "Timestamp": "2025-05-08 23:48:52",
+    "Symbols": "BTCUSDT, ETHUSDT, SOLUSDT",
+    "Initial Capital": 1000000.0,
+    "Final Portfolio Value": 2018753.0219678348,
+    "PnL": 1018753.0219678348,
+    "Cash Balance": 1999489.8169258456,
+    "Unrealized PnL": 19263.205041989157,
+    "Duration (s)": 600
+  },
+  {
+    "Timestamp": "2025-05-09 00:13:13",
+    "Symbols": "ETHUSDT, SOLUSDT, BNBUSDT",
+    "Initial Capital": 1000000.0,
+    "Final Portfolio Value": 2040385.5724281115,
+    "PnL": 1040385.5724281115,
+    "Cash Balance": 2040385.5724281115,
+    "Unrealized PnL": 0.0,
+    "Duration (s)": 600
+  },
+  {
+    "Timestamp": "2025-05-09 00:30:03",
+    "Symbols": "ETHUSDT, SOLUSDT, BNBUSDT",
+    "Initial Capital": 63652.0,
+    "Final Portfolio Value": 74789.9483021859,
+    "PnL": 11137.948302185905,
+    "Cash Balance": 74789.9483021859,
+    "Unrealized PnL": 0.0,
+    "Duration (s)": 850
+  },
+  {
+    "Timestamp": "2025-05-09 01:54:03",
+    "Symbols": "ETHUSDT, SOLUSDT",
+    "Initial Capital": 1000003.0,
+    "Final Portfolio Value": 1046553.314668753,
+    "PnL": 46550.31466875295,
+    "Cash Balance": 1040343.5123084567,
+    "Unrealized PnL": 6209.802360296237,
+    "Duration (s)": 300
+  },
+  {
+    "Timestamp": "2025-05-09 02:02:29",
+    "Symbols": "ETHUSDT, SOLUSDT, BNBUSDT, BTCUSDT",
+    "Initial Capital": 1000003.0,
+    "Final Portfolio Value": 1171777.6512395157,
+    "PnL": 171774.65123951575,
+    "Cash Balance": 1171777.6512395157,
+    "Unrealized PnL": 0.0,
+    "Duration (s)": 300
+  },
+  {
+    "Timestamp": "2025-05-09 02:08:30",
+    "Symbols": "BTCUSDT",
+    "Initial Capital": 1000003.0,
+    "Final Portfolio Value": 1598217.566505909,
+    "PnL": 598214.566505909,
+    "Cash Balance": 1609343.8946665584,
+    "Unrealized PnL": -11126.32816064949,
+    "Duration (s)": 300
+  },
+  {
+    "Timestamp": "2025-05-09 03:14:18",
+    "Symbols": "BNBUSDT",
+    "Initial Capital": 1000003.0,
+    "Final Portfolio Value": 1793453.9958825116,
+    "PnL": 793450.9958825116,
+    "Cash Balance": 1793453.9958825116,
+    "Unrealized PnL": 0.0,
+    "Duration (s)": 300
+  },
+  {
+    "Timestamp": "2025-05-09 23:28:49",
+    "Symbols": "BTCUSDT, ETHUSDT",
+    "Initial Capital": 10000.0,
+    "Final Portfolio Value": 11953.142810385782,
+    "PnL": 1953.1428103857816,
+    "Cash Balance": 11953.142810385782,
+    "Unrealized PnL": 0.0,
+    "Duration (s)": 300
+  },
+  {
+    "Timestamp": "2025-05-09 23:42:06",
+    "Symbols": "BTCUSDT, ETHUSDT, SOLUSDT",
+    "Initial Capital": 178541.0,
+    "Final Portfolio Value": 402189.0302132811,
+    "PnL": 223648.0302132811,
+    "Cash Balance": 402189.0302132811,
+    "Unrealized PnL": 0.0,
+    "Duration (s)": 600
+  },
+  {
+    "Timestamp": "2025-05-10 00:16:13",
+    "Symbols": "BTCUSDT, ETHUSDT, SOLUSDT",
+    "Initial Capital": 17854100.0,
+    "Final Portfolio Value": 22580742.163054384,
+    "PnL": 4726642.163054384,
+    "Cash Balance": 21569887.90802219,
+    "Unrealized PnL": 1010854.2550321941,
+    "Duration (s)": 600
+  },
+  {
+    "Timestamp": "2025-05-10 01:26:10",
+    "Symbols": "BNBUSDT, SOLUSDT",
+    "Initial Capital": 10000000.0,
+    "Final Portfolio Value": 18202149.74675501,
+    "PnL": 8202149.746755011,
+    "Cash Balance": 17868032.651002612,
+    "Unrealized PnL": 334117.0957523996,
+    "Duration (s)": 696
+  },
+  {
+    "Timestamp": "2025-05-11 00:48:48",
+    "Symbols": "BTCUSDT, ETHUSDT",
+    "Initial Capital": 10000.0,
+    "Final Portfolio Value": 12897.673279392147,
+    "PnL": 2897.6732793921474,
+    "Cash Balance": 12897.673279392147,
+    "Unrealized PnL": 0.0,
+    "Duration (s)": 300
+  },
+  {
+    "Timestamp": "2025-05-11 02:10:54",
+    "Symbols": "BTCUSDT, ETHUSDT",
+    "Initial Capital": 10000.0,
+    "Final Portfolio Value": 13981.44400519068,
+    "PnL": 3981.4440051906804,
+    "Cash Balance": 13981.44400519068,
+    "Unrealized PnL": 0.0,
+    "Duration (s)": 300
   }
 ]
