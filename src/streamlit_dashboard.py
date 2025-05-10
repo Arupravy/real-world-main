@@ -26,10 +26,17 @@ import io
 from backtesting_engine.real_time_runner import RealTimeTrader
 from price_engine.data_sources.websocket_handler import start_price_feed
 
+from backtesting_engine.backtest_runner import run_backtest_for_ui
+
 
 from sentiment.news_fetcher import fetch_marketaux_news
 from sentiment.sentiment_engine import get_sentiment
 from sentiment.sentiment_state import SentimentTracker
+
+import streamlit as st
+
+if "page" not in st.session_state:
+    st.session_state.page = "main"
 
 
 tracker = SentimentTracker()
@@ -456,113 +463,320 @@ if 'trader' not in st.session_state:
     st.session_state.session_saved = False
     st.session_state.is_running = False
 
+page = st.sidebar.radio("🧭 Select Mode", ["Real-Time Trading", "Backtesting"])
+
+if page == "Real-Time Trading":
+    st.session_state.page = "trading"
+else:
+    st.session_state.page = "backtest"
+
+
 # Sidebar config
-st.sidebar.title("⚙️ Trading Configuration")
-initial_capital = st.sidebar.number_input("Initial Capital ($)", min_value=1000, value=10000)
-runtime = st.sidebar.number_input("Runtime (seconds)", min_value=1, value=300, step=10)
-symbols = st.sidebar.multiselect(
-    "Symbols to Track",
-    ["BTCUSDT", "ETHUSDT", "BNBUSDT", "SOLUSDT"],
-    default=["BTCUSDT", "ETHUSDT"]
-)
+# === Real-Time Trading UI ===
+if st.session_state.page == "trading":
+    st.sidebar.title("⚙️ Trading Configuration")
+    initial_capital = st.sidebar.number_input("Initial Capital ($)", min_value=1000, value=10000)
+    runtime = st.sidebar.number_input("Runtime (seconds)", min_value=1, value=300, step=10)
+    symbols = st.sidebar.multiselect(
+        "Symbols to Track",
+        ["BTCUSDT", "ETHUSDT", "BNBUSDT", "SOLUSDT"],
+        default=["BTCUSDT", "ETHUSDT"]
+    )
 
-# Start button
-if st.sidebar.button("▶️ Start Trading") and not st.session_state.is_running:
-    with st.spinner("🚀 Starting trading session..."):
-        # Initialize trader if not exists
-        if st.session_state.trader is None:
-            st.session_state.trader = RealTimeTrader(capital=initial_capital, runtime=runtime)
-        
-        # Start price feed thread if not running
-        if st.session_state.runner_thread is None or not st.session_state.runner_thread.is_alive():
-            st.session_state.runner_thread = threading.Thread(
-                target=start_price_feed,
-                args=(symbols, st.session_state.trader.on_price_update),
-                daemon=True
-            )
-            st.session_state.runner_thread.start()
-        
-        st.session_state.is_running = True
-        st.session_state.show_summary = False
-        st.session_state.trader.is_active = True  # Ensure trader is active
-        st.session_state.trader.start_time = time.time()  # Reset start time
-        st.success("Trading session ACTIVE - Live data streaming")
-        st.rerun()
+    # Start button
+    if st.sidebar.button("▶️ Start Trading") and not st.session_state.is_running:
+        with st.spinner("🚀 Starting trading session..."):
+            if st.session_state.trader is None:
+                st.session_state.trader = RealTimeTrader(capital=initial_capital, runtime=runtime)
 
-# Stop button
-if st.sidebar.button("⏹ Stop Trading"):
-    if st.session_state.trader and st.session_state.is_running:
-        with st.spinner("🛑 Stopping session..."):
+            if st.session_state.runner_thread is None or not st.session_state.runner_thread.is_alive():
+                st.session_state.runner_thread = threading.Thread(
+                    target=start_price_feed,
+                    args=(symbols, st.session_state.trader.on_price_update),
+                    daemon=True
+                )
+                st.session_state.runner_thread.start()
+
+            st.session_state.is_running = True
+            st.session_state.show_summary = False
+            st.session_state.trader.is_active = True
+            st.session_state.trader.start_time = time.time()
+            st.success("Trading session ACTIVE - Live data streaming")
+            st.rerun()
+
+    # Stop button
+    if st.sidebar.button("⏹ Stop Trading"):
+        if st.session_state.trader and st.session_state.is_running:
+            with st.spinner("🛑 Stopping session..."):
+                trader = st.session_state.trader
+                trader.stop()
+
+                st.session_state.last_summary = trader.get_portfolio_summary()
+                st.session_state.last_logs = trader.get_logs()
+                st.session_state.last_timeline = trader.get_pnl_data()
+
+                save_completed_session(trader, symbols, initial_capital, runtime)
+
+                st.session_state.is_running = False
+                st.session_state.show_summary = True
+                st.rerun()
+
+    # Check for expired sessions
+    if (st.session_state.is_running and 
+        st.session_state.trader and 
+        not st.session_state.trader.is_active):
+        
+        with st.spinner("📊 Preparing session summary..."):
             trader = st.session_state.trader
-            trader.stop()
-            
-            # Capture session data
             st.session_state.last_summary = trader.get_portfolio_summary()
             st.session_state.last_logs = trader.get_logs()
             st.session_state.last_timeline = trader.get_pnl_data()
             
             save_completed_session(trader, symbols, initial_capital, runtime)
-            
-            # Update states
             st.session_state.is_running = False
             st.session_state.show_summary = True
             st.rerun()
 
-# Check for expired sessions
-if (st.session_state.is_running and 
-    st.session_state.trader and 
-    not st.session_state.trader.is_active):
-    
-    with st.spinner("📊 Preparing session summary..."):
+    # Handle summary display after session ends
+    if st.session_state.show_summary:
+            st.success("🎉 Trading session completed!")
+
+            st.title("♞  The Real World Trading Engine")
+            st.subheader("📋 Final Summary")
+            final_pnl = st.session_state.last_summary.get("final_pnl", 0)
+            final_value = st.session_state.last_summary.get("final_portfolio_value", 0)
+
+            st.metric("💰 Final Portfolio Value", f"${final_value:,.2f}")
+            st.metric("📊 Final Profit/Loss", f"${final_pnl:,.2f}")
+
+            # Generate chart from saved timeline
+            pnl_df = pd.DataFrame(st.session_state.last_timeline)
+            fig = go.Figure()
+            if not pnl_df.empty and {"timestamp", "portfolio_value"}.issubset(pnl_df.columns):
+                pnl_df["timestamp"] = pd.to_datetime(pnl_df["timestamp"])
+                fig.add_trace(go.Scatter(x=pnl_df["timestamp"], y=pnl_df["portfolio_value"],
+                                        mode='lines+markers', line=dict(color="skyblue"),
+                                        name="Portfolio Value"))
+                fig.update_layout(
+                                title="📈 Portfolio Value Over Time",
+                                xaxis_title="Timestamp",
+                                yaxis_title="Portfolio ($)",
+                                template="plotly_dark",
+                                plot_bgcolor="#0e1117",
+                                paper_bgcolor="#0e1117",
+                                font=dict(color="#ffffff"),
+                                height=450
+                            )
+                st.plotly_chart(fig, use_container_width=True)
+
+                peak_value = pnl_df["portfolio_value"].max()
+                peak_time = pnl_df.loc[pnl_df["portfolio_value"].idxmax(), "timestamp"]
+                st.markdown(
+                    f"""<p style='font-size:18px; color:#f1f1f1; margin-top:1.5rem;'>
+                        <strong>🔝 Peak Portfolio Value:</strong> 
+                        <span style='color:#27ae60;'>${peak_value:,.2f}</span> 
+                        <span style='color:#aaaaaa;'>on {peak_time.strftime('%Y-%m-%d %H:%M:%S')}</span>
+                    </p>""",
+                    unsafe_allow_html=True
+                )
+
+            if st.button("📧 Send Final Email Summary"):
+                if send_email_with_chart(st.session_state.last_summary, 
+                                    st.session_state.last_logs, 
+                                    fig):
+                    st.success("✅ Email sent successfully!")
+                else:
+                    st.error("❌ Failed to send email")
+            
+            if st.sidebar.button("🔄 Reset Session"):
+                st.session_state.trader = None
+                st.session_state.runner_thread = None
+                st.session_state.show_summary = False
+                st.session_state.last_summary = {}
+                st.session_state.last_logs = []
+                st.session_state.last_timeline = []
+                st.rerun()
+            
+            # Display Session History Table
+            # st.write("DEBUG - completed_runs:", st.session_state.get("completed_runs", "Not Found"))
+            
+            #Sentiment
+            st.markdown("---")
+            news_data = fetch_marketaux_news(symbols="TSLA", limit=4)
+            for article in news_data:
+                title = article.get("title")
+                sentiment = get_sentiment(title)
+                tracker.update(sentiment, title)
+
+            # Display live scores
+            st.metric("📈 Avg Sentiment Score", round(tracker.get_average_sentiment(), 3))
+
+            # Show table of recent news
+            st.subheader("📰 Latest Headlines with Sentiment")
+            for item in tracker.get_history():
+                st.write(f"**{item['headline']}**")
+                st.write(f"🕒 {item['timestamp']} — Sentiment: `{item['score']}`")
+                st.markdown("---")
+                
+
+            if st.session_state.completed_runs:
+                st.subheader("📊 Session History")
+                history_df = pd.DataFrame(st.session_state.completed_runs)
+                st.dataframe(history_df)
+
+                st.subheader("📈 Portfolio Performance Timeline")
+                display_portfolio_timeline(
+                    st.session_state.completed_runs,
+                    title="Trading Performance",
+                    height=600,
+                    line_color="#00CC96",
+                    colorscale="Viridis",
+                    padding=dict(l=50, r=50, t=100, b=50),
+                    show_dataframe=True
+                )
+
+                display_symbol_performance(history_df)
+
+                
+
+            st.stop()
+
+    # Active trading UI - ONLY show if trader exists
+
+    if st.session_state.is_running and st.session_state.trader:
         trader = st.session_state.trader
-        st.session_state.last_summary = trader.get_portfolio_summary()
-        st.session_state.last_logs = trader.get_logs()
-        st.session_state.last_timeline = trader.get_pnl_data()
-        
-        save_completed_session(trader, symbols, initial_capital, runtime)
-        st.session_state.is_running = False
-        st.session_state.show_summary = True
-        st.rerun()
 
-# Handle summary display after session ends
-if st.session_state.show_summary:
-        st.success("🎉 Trading session completed!")
+        if st.session_state.trader and st.sidebar.checkbox("Show Debug Info"):
+            st.sidebar.subheader("🧑‍💻 Trader State Validation")
+            validation = st.session_state.trader.validate_state()
+            
+            st.sidebar.json({
+                "Status": "🟢 ACTIVE" if validation['is_active'] else "🔴 INACTIVE",
+                "Runtime": f"{validation['last_update']:.1f}s",
+                "Open Positions": validation['positions'],
+                "Thread Status": "Alive" if st.session_state.runner_thread.is_alive() else "Dead"
+            })
+            
+            if st.sidebar.button("Force Refresh State"):
+                st.rerun()
 
-        st.title("♞  The Real World Trading Engine")
-        st.subheader("📋 Final Summary")
-        final_pnl = st.session_state.last_summary.get("final_pnl", 0)
-        final_value = st.session_state.last_summary.get("final_portfolio_value", 0)
+        # Time remaining display
+        elapsed = int(time.time() - trader.start_time)
+        remaining = max(runtime - elapsed, 0)
+        st.sidebar.metric("⏳ Time Remaining", f"{remaining} sec")
 
-        st.metric("💰 Final Portfolio Value", f"${final_value:,.2f}")
-        st.metric("📊 Final Profit/Loss", f"${final_pnl:,.2f}")
+        if remaining <= 0:
+            st.warning("Session completed - preparing summary...")
+            time.sleep(1)
+            st.rerun()
 
-        # Generate chart from saved timeline
-        pnl_df = pd.DataFrame(st.session_state.last_timeline)
+        if time.time() - getattr(trader, 'last_save_time', 0) > 300:  # Auto-save every 5 minutes
+            save_history(st.session_state.completed_runs)
+            trader.last_save_time = time.time()
+
+        # --- Main UI ---
+        st.title("♞ The Real World Trading Engine")
+        st.subheader("📊 Real-Time Trading Dashboard")
+
+
+        # Portfolio Summary
+        col1, col2, col3, col4 = st.columns(4)
+        with col1:
+            st.metric("💼 Initial Capital", f"${trader.initial_capital:,.2f}")
+        with col2:
+            st.metric("💵 Cash Balance", f"${trader.cash_balance:,.2f}")
+        with col3:
+            unrealized = trader.calculate_unrealized_pnl()
+            st.metric("📈 Unrealized P&L", f"${unrealized:,.2f}")
+        with col4:
+            portfolio_value = trader.cash_balance + unrealized
+            st.metric("📊 Current Portfolio Value", f"${portfolio_value:,.2f}")
+
+        # PnL Chart
+        expected_keys = {"timestamp", "portfolio_value"}
+        cleaned_timeline = [
+            entry for entry in trader.pnl_timeline
+            if isinstance(entry, dict) and expected_keys.issubset(entry)
+        ]
+        pnl_df = pd.DataFrame(cleaned_timeline)
         fig = go.Figure()
-        if not pnl_df.empty and {"timestamp", "portfolio_value"}.issubset(pnl_df.columns):
+
+        if not pnl_df.empty:
             pnl_df["timestamp"] = pd.to_datetime(pnl_df["timestamp"])
             fig.add_trace(go.Scatter(x=pnl_df["timestamp"], y=pnl_df["portfolio_value"],
-                                     mode='lines+markers', line=dict(color="skyblue"),
-                                     name="Portfolio Value"))
+                                    mode='lines+markers', line=dict(color="skyblue"),
+                                    name="Portfolio Value"))
             fig.update_layout(
-                            title="📈 Portfolio Value Over Time",
-                            xaxis_title="Timestamp",
-                            yaxis_title="Portfolio ($)",
-                            template="plotly_dark",
-                            plot_bgcolor="#0e1117",
-                            paper_bgcolor="#0e1117",
-                            font=dict(color="#ffffff"),
-                            height=450
-                        )
+                                title="📈 Portfolio Value Over Time",
+                                xaxis_title="Timestamp",
+                                yaxis_title="Portfolio ($)",
+                                template="plotly_dark",
+                                plot_bgcolor="#0e1117",
+                                paper_bgcolor="#0e1117",
+                                font=dict(color="#ffffff"),
+                                height=450
+                            )
+        st.plotly_chart(fig, use_container_width=True)
 
-        if st.button("📧 Send Final Email Summary"):
-            if send_email_with_chart(st.session_state.last_summary, 
-                                   st.session_state.last_logs, 
-                                   fig):
+        # Open Positions
+        if trader.positions:
+            st.subheader("📌 Open Positions")
+            pos_data = []
+            for symbol, pos in trader.positions.items():
+                current_price = trader.data[symbol][-1]["price"] if trader.data[symbol] and "price" in trader.data[symbol][-1] else 0
+                pnl = (current_price - pos["entry_price"]) * pos["size"]
+                pos_data.append({
+                    "Symbol": symbol,
+                    "Side": pos["side"].upper(),
+                    "Entry Price": round(pos["entry_price"], 2),
+                    "Size": round(pos["size"], 4),
+                    "Current Price": round(current_price, 2),
+                    "PnL": round(pnl, 2)
+                })
+            st.dataframe(pd.DataFrame(pos_data), use_container_width=True)
+        else:
+            st.info("No open positions currently.")
+
+        # Trade Logs
+        st.subheader("🧾 Trade Logs")
+        if trader.logs:
+            st.code("\n".join(trader.logs[-20:]), language="bash")
+        else:
+            st.write("Waiting for trade signals...")
+            
+
+        # Download logs
+        if st.button("📥 Download Logs as CSV"):
+            csv_buffer = StringIO()
+            log_df = pd.DataFrame(trader.logs, columns=["Trade Logs"])
+            log_df.to_csv(csv_buffer, index=False)
+            st.download_button("Download Logs", csv_buffer.getvalue(), file_name="trade_logs.csv", mime="text/csv")
+
+
+        # Manual email send during session
+        if st.button("📧 Send Email Summary"):
+            summary = {
+                "final_portfolio_value": portfolio_value,
+                "final_pnl": portfolio_value - trader.initial_capital,
+                "cash_balance": trader.cash_balance,
+                "unrealized_pnl": unrealized
+            }
+            if send_email_with_chart(summary, trader.logs, fig):
                 st.success("✅ Email sent successfully!")
             else:
                 st.error("❌ Failed to send email")
-        
+
+        # Save state
+        st.session_state.last_summary = {
+            "final_portfolio_value": portfolio_value,
+            "final_pnl": portfolio_value - trader.initial_capital,
+            "cash_balance": trader.cash_balance,
+            "unrealized_pnl": unrealized
+        }
+        st.session_state.last_logs = trader.logs.copy()
+        st.session_state.last_timeline = trader.pnl_timeline.copy()
+
+        # Reset
         if st.sidebar.button("🔄 Reset Session"):
             st.session_state.trader = None
             st.session_state.runner_thread = None
@@ -571,203 +785,74 @@ if st.session_state.show_summary:
             st.session_state.last_logs = []
             st.session_state.last_timeline = []
             st.rerun()
-        
-        # Display Session History Table
-        # st.write("DEBUG - completed_runs:", st.session_state.get("completed_runs", "Not Found"))
-        
-        #Sentiment
-        st.markdown("---")
-        news_data = fetch_marketaux_news(symbols="TSLA,BTC", limit=3)
-        for article in news_data:
-            title = article.get("title")
-            sentiment = get_sentiment(title)
-            tracker.update(sentiment, title)
 
-        # Display live scores
-        st.metric("📈 Avg Sentiment Score", round(tracker.get_average_sentiment(), 3))
-
-        # Show table of recent news
-        st.subheader("📰 Latest Headlines with Sentiment")
-        for item in tracker.get_history():
-            st.write(f"**{item['headline']}**")
-            st.write(f"🕒 {item['timestamp']} — Sentiment: `{item['score']}`")
-            st.markdown("---")
-            
-
-        if st.session_state.completed_runs:
-            st.subheader("📊 Session History")
-            history_df = pd.DataFrame(st.session_state.completed_runs)
-            st.dataframe(history_df)
-
-            st.subheader("📈 Portfolio Performance Timeline")
-            display_portfolio_timeline(
-                st.session_state.completed_runs,
-                title="Trading Performance",
-                height=600,
-                line_color="#00CC96",
-                colorscale="Viridis",
-                padding=dict(l=50, r=50, t=100, b=50),
-                show_dataframe=True
-            )
-
-            display_symbol_performance(history_df)
-
-            
-
-        st.stop()
-
-# Active trading UI - ONLY show if trader exists
-
-if st.session_state.is_running and st.session_state.trader:
-    trader = st.session_state.trader
-
-    if st.session_state.trader and st.sidebar.checkbox("Show Debug Info"):
-        st.sidebar.subheader("🧑‍💻 Trader State Validation")
-        validation = st.session_state.trader.validate_state()
-        
-        st.sidebar.json({
-            "Status": "🟢 ACTIVE" if validation['is_active'] else "🔴 INACTIVE",
-            "Runtime": f"{validation['last_update']:.1f}s",
-            "Open Positions": validation['positions'],
-            "Thread Status": "Alive" if st.session_state.runner_thread.is_alive() else "Dead"
-        })
-        
-        if st.sidebar.button("Force Refresh State"):
-            st.rerun()
-
-    # Time remaining display
-    elapsed = int(time.time() - trader.start_time)
-    remaining = max(runtime - elapsed, 0)
-    st.sidebar.metric("⏳ Time Remaining", f"{remaining} sec")
-
-    if remaining <= 0:
-        st.warning("Session completed - preparing summary...")
+        # Auto-refresh
         time.sleep(1)
         st.rerun()
 
-    if time.time() - getattr(trader, 'last_save_time', 0) > 300:  # Auto-save every 5 minutes
-        save_history(st.session_state.completed_runs)
-        trader.last_save_time = time.time()
-
-    # --- Main UI ---
-    st.title("♞ The Real World Trading Engine")
-    st.subheader("📊 Real-Time Trading Dashboard")
-
-
-    # Portfolio Summary
-    col1, col2, col3, col4 = st.columns(4)
-    with col1:
-        st.metric("💼 Initial Capital", f"${trader.initial_capital:,.2f}")
-    with col2:
-        st.metric("💵 Cash Balance", f"${trader.cash_balance:,.2f}")
-    with col3:
-        unrealized = trader.calculate_unrealized_pnl()
-        st.metric("📈 Unrealized P&L", f"${unrealized:,.2f}")
-    with col4:
-        portfolio_value = trader.cash_balance + unrealized
-        st.metric("📊 Current Portfolio Value", f"${portfolio_value:,.2f}")
-
-    # PnL Chart
-    expected_keys = {"timestamp", "portfolio_value"}
-    cleaned_timeline = [
-        entry for entry in trader.pnl_timeline
-        if isinstance(entry, dict) and expected_keys.issubset(entry)
-    ]
-    pnl_df = pd.DataFrame(cleaned_timeline)
-    fig = go.Figure()
-
-    if not pnl_df.empty:
-        pnl_df["timestamp"] = pd.to_datetime(pnl_df["timestamp"])
-        fig.add_trace(go.Scatter(x=pnl_df["timestamp"], y=pnl_df["portfolio_value"],
-                                mode='lines+markers', line=dict(color="skyblue"),
-                                name="Portfolio Value"))
-        fig.update_layout(
-                            title="📈 Portfolio Value Over Time",
-                            xaxis_title="Timestamp",
-                            yaxis_title="Portfolio ($)",
-                            template="plotly_dark",
-                            plot_bgcolor="#0e1117",
-                            paper_bgcolor="#0e1117",
-                            font=dict(color="#ffffff"),
-                            height=450
-                        )
-    st.plotly_chart(fig, use_container_width=True)
-
-    # Open Positions
-    if trader.positions:
-        st.subheader("📌 Open Positions")
-        pos_data = []
-        for symbol, pos in trader.positions.items():
-            current_price = trader.data[symbol][-1]["price"] if trader.data[symbol] and "price" in trader.data[symbol][-1] else 0
-            pnl = (current_price - pos["entry_price"]) * pos["size"]
-            pos_data.append({
-                "Symbol": symbol,
-                "Side": pos["side"].upper(),
-                "Entry Price": round(pos["entry_price"], 2),
-                "Size": round(pos["size"], 4),
-                "Current Price": round(current_price, 2),
-                "PnL": round(pnl, 2)
-            })
-        st.dataframe(pd.DataFrame(pos_data), use_container_width=True)
     else:
-        st.info("No open positions currently.")
-
-    # Trade Logs
-    st.subheader("🧾 Trade Logs")
-    if trader.logs:
-        st.code("\n".join(trader.logs[-20:]), language="bash")
-    else:
-        st.write("Waiting for trade signals...")
-        
-
-    # Download logs
-    if st.button("📥 Download Logs as CSV"):
-        csv_buffer = StringIO()
-        log_df = pd.DataFrame(trader.logs, columns=["Trade Logs"])
-        log_df.to_csv(csv_buffer, index=False)
-        st.download_button("Download Logs", csv_buffer.getvalue(), file_name="trade_logs.csv", mime="text/csv")
+        # Initial state when no trader exists
+        st.title("♞ The Real World Trading Engine")
+        st.info("Configure and start The Real World Trading Engine from the sidebar.")
+        st.image("Images/Real World 4k.jpeg")
+        st.title("Money making is A SKILL, we will teach you how to MASTER IT.")
 
 
-    # Manual email send during session
-    if st.button("📧 Send Email Summary"):
-        summary = {
-            "final_portfolio_value": portfolio_value,
-            "final_pnl": portfolio_value - trader.initial_capital,
-            "cash_balance": trader.cash_balance,
-            "unrealized_pnl": unrealized
-        }
-        if send_email_with_chart(summary, trader.logs, fig):
-            st.success("✅ Email sent successfully!")
-        else:
-            st.error("❌ Failed to send email")
 
-    # Save state
-    st.session_state.last_summary = {
-        "final_portfolio_value": portfolio_value,
-        "final_pnl": portfolio_value - trader.initial_capital,
-        "cash_balance": trader.cash_balance,
-        "unrealized_pnl": unrealized
-    }
-    st.session_state.last_logs = trader.logs.copy()
-    st.session_state.last_timeline = trader.pnl_timeline.copy()
 
-    # Reset
-    if st.sidebar.button("🔄 Reset Session"):
-        st.session_state.trader = None
-        st.session_state.runner_thread = None
-        st.session_state.show_summary = False
-        st.session_state.last_summary = {}
-        st.session_state.last_logs = []
-        st.session_state.last_timeline = []
-        st.rerun()
 
-    # Auto-refresh
-    time.sleep(1)
-    st.rerun()
+# === Backtesting UI ===
+elif st.session_state.page == "backtest":
+    st.title("📊 Backtesting Interface")
 
-else:
-    # Initial state when no trader exists
-    st.title("♞ The Real World Trading Engine")
-    st.info("Configure and start The Real World Trading Engine from the sidebar.")
-    st.image("Images/Real World 4k.jpeg", use_container_width=True)
-    st.title("Money making is A SKILL, we will teach you how to MASTER IT.")
+    symbols_input = st.text_input("Enter symbols (comma-separated)", value="BTCUSDT,ETHUSDT")
+    allocations_input = st.text_input("Enter allocations (%) for each symbol", value="60,40")
+    start_date = st.date_input("Start Date")
+    end_date = st.date_input("End Date")
+    strategy = st.selectbox("Select Strategy", options=["bollinger", "mean_reversion", "trendpullback"])
+
+    run_btn = st.button("🚀 Run Backtest")
+
+    if run_btn:
+        try:
+            symbols = [s.strip().upper() for s in symbols_input.split(",")]
+            allocations = list(map(float, allocations_input.split(",")))
+
+            if len(symbols) != len(allocations):
+                st.error("❌ Number of symbols must match number of allocations.")
+            elif round(sum(allocations), 2) != 100.0:
+                st.error("❌ Allocations must sum to 100%.")
+            else:
+                st.info("Running backtest... please wait.")
+                results = run_backtest_for_ui(
+                    symbols=symbols,
+                    allocations=allocations,
+                    start=start_date.strftime("%Y-%m-%d"),
+                    end=end_date.strftime("%Y-%m-%d"),
+                    strategy=strategy,
+                )
+
+                st.success("✅ Backtest Complete!")
+                st.metric("Initial Capital", f"${results['initial_capital']:,}")
+                st.metric("Final Net Worth", f"${results['final_net_worth']:.2f}")
+                st.metric("Total Return", f"{results['total_return']:.2f}%")
+                st.metric("Total Trades", results["total_trades"])
+
+                st.subheader("📊 Per-Symbol Performance")
+                st.dataframe(results["per_symbol_logs"])
+
+                st.subheader("🧾 Trade Log")
+                st.dataframe(results["trade_log_df"])
+
+                if results["pnl_chart_data"] is not None:
+                    st.line_chart(results["pnl_chart_data"])
+
+        except Exception as e:
+            st.error(f"❌ Error during backtest: {e}")
+
+
+
+
+
+
+
