@@ -530,5 +530,17 @@
         "symbol": "ETHUSDT",
         "source": "coinbase",
         "price": 1795.535
+    },
+    {
+        "timestamp": "2025-05-11 01:51:29",
+        "symbol": "AAPL",
+        "source": "yahoo",
+        "price": 198.52999877929688
+    },
+    {
+        "timestamp": "2025-05-11 01:51:29",
+        "symbol": "TSLA",
+        "source": "yahoo",
+        "price": 298.260009765625
     }
 ]
