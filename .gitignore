@@ -5,7 +5,7 @@ __pycache__/
 *.pyd
 *.db
 *.sqlite3
-
+Dockerfile
 # Virtual Environment
 venv/
 env/
