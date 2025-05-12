@@ -1,0 +1,26 @@
+# Ignore Python virtual env or Conda env folder
+env/
+.venv/
+venv/
+.env
+
+# Byte-compiled / cache files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Git
+.git
+.gitignore
+
+# Docker files
+Dockerfile*
+.dockerignore
+
+# IDE/editor folders
+.vscode/
+.idea/
+
+# Logs and tmp
+*.log
+*.tmp
