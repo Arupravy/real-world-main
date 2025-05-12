@@ -1,0 +1,1 @@
+web: streamlit run src/streamlit_dashboard.py --server.port=$PORT --server.address=0.0.0.0
