@@ -542,5 +542,29 @@
         "symbol": "TSLA",
         "source": "yahoo",
         "price": 298.260009765625
+    },
+    {
+        "timestamp": "2025-05-13 01:17:00",
+        "symbol": "TSLA",
+        "source": "yahoo",
+        "price": 317.4100036621094
+    },
+    {
+        "timestamp": "2025-05-13 01:17:18",
+        "symbol": "LTCUSDT",
+        "source": "binance",
+        "price": 100.96
+    },
+    {
+        "timestamp": "2025-05-13 20:35:59",
+        "symbol": "AAPL",
+        "source": "yahoo",
+        "price": 211.4499969482422
+    },
+    {
+        "timestamp": "2025-05-13 21:11:09",
+        "symbol": "AAPL",
+        "source": "yahoo",
+        "price": 211.1300048828125
     }
 ]
