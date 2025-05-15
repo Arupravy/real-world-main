@@ -136,28 +136,37 @@ class PriceAggregator:
         This wraps get_historical_prices into a DataFrame output.
         """
         try:
+            print(f"[Aggregator] Fetching historical data for {symbol} ({self.asset_type}) from {from_date} to {to_date}")
             raw_data = self.get_historical_prices(symbol, from_date, to_date)
+
+            if not raw_data:
+                print(f"[Aggregator] No data returned for {symbol}")
+                return pd.DataFrame()
 
             # Convert list of dicts to DataFrame
             df = pd.DataFrame(raw_data)
 
-            # If it's crypto, we may only have 'date' and 'price'
-            if "price" in df.columns:
+            if "price" in df.columns:  # for crypto
                 df.rename(columns={"price": "close", "date": "timestamp"}, inplace=True)
                 df["open"] = df["close"]
                 df["high"] = df["close"]
                 df["low"] = df["close"]
-                df["volume"] = 100  # Placeholder if you don’t have volume
-            elif "close" not in df.columns:
-                raise ValueError("Expected 'close' price in data.")
+                df["volume"] = 100  # Placeholder
+            elif "close" in df.columns and "date" in df.columns:  # for stock (yahoo)
+                df.rename(columns={"date": "timestamp"}, inplace=True)
+            else:
+                raise ValueError("Unrecognized data format in historical data.")
 
             df["timestamp"] = pd.to_datetime(df["timestamp"])
             df.set_index("timestamp", inplace=True)
+            df.sort_index(inplace=True)
 
             return df
+
         except Exception as e:
-            print(f"Error in fetch_historical_data: {e}")
+            print(f"[Aggregator] Error in fetch_historical_data: {e}")
             return pd.DataFrame()
+
 
 
 
@@ -181,3 +190,24 @@ class PriceAggregator:
     def get_price_history(self) -> list:
         """Return the price history."""
         return self.price_history.get_history()
+
+def aggregate_price(symbol: str, asset_type: str = "crypto"):
+    """Convenience wrapper to get aggregated price and raw source prices."""
+    aggregator = PriceAggregator(asset_type=asset_type, symbols=[symbol])
+    prices = aggregator.get_all_prices(symbol)
+
+    valid_prices = [p for p in prices.values() if p is not None]
+
+    if not valid_prices:
+        print("No valid prices found from any source.")
+        return None, prices  # <-- tuple!
+
+    weighted_avg_price = round(sum(valid_prices) / len(valid_prices), 4)
+    return weighted_avg_price, prices  # <-- tuple!
+
+
+
+def fetch_historical_data(symbol: str, asset_type: str, from_date: str, to_date: str):
+    """Convenience wrapper for Streamlit to access historical price data."""
+    aggregator = PriceAggregator(asset_type=asset_type, symbols=[symbol])
+    return aggregator.fetch_historical_data(symbol, from_date, to_date)
