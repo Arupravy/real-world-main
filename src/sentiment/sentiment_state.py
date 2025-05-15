@@ -8,7 +8,7 @@ class SentimentTracker:
 
     def update(self, sentiment_score: float, headline: str):
         self.history.append({
-            "timestamp": datetime.utcnow(),
+            "timestamp": datetime.now(),
             "headline": headline,
             "score": sentiment_score
         })
