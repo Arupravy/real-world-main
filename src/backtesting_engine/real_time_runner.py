@@ -10,7 +10,7 @@ from .strategies.strategy_trend_breakout import (
 )
 
 class RealTimeTrader:
-    def __init__(self, capital, runtime):
+    def __init__(self, capital, runtime, long_thresh: float = None, short_thresh: float = None, **_ignored):
         self.runtime = runtime
         self.initial_capital = capital
         self.cash_balance = capital             # Realized PnL stored here (initial + realized)
@@ -224,9 +224,8 @@ class RealTimeTrader:
 
     def validate_state(self):
         with self.lock:
-            elapsed = time.time() - self.start_time
             return {
                 'is_active': self.is_active,
                 'positions': len(self.positions),
-                'last_update': elapsed
+                'last_update': time.time() - self.start_time
             }
