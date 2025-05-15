@@ -5,6 +5,8 @@ import os
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), 'src')))
 
 import json
+from datetime import datetime, date
+import datetime
 import streamlit as st
 import pandas as pd
 import plotly.graph_objects as go
@@ -24,14 +26,26 @@ import plotly.io as pio
 import io
 
 from backtesting_engine.real_time_runner import RealTimeTrader
+from backtesting_engine.real_time_runner_sentiment import RealTimeSentimentTrader
 from price_engine.data_sources.websocket_handler import start_price_feed
 
 from backtesting_engine.backtest_runner import run_backtest_for_ui
 
 
-from sentiment.news_fetcher import fetch_marketaux_news
-from sentiment.sentiment_engine import get_sentiment
-from sentiment.sentiment_state import SentimentTracker
+from sentiment.news_fetcher import fetch_cryptopanic_news
+from sentiment.improved_sentiment_module import SentimentTracker
+from sentiment.improved_sentiment_module import (
+    EnhancedSentimentAnalyzer,
+    SentimentTracker as SmoothedSentimentTracker
+)
+
+
+from price_engine import aggregator
+from price_engine.aggregator import aggregate_price
+
+from price_engine.price_history import PriceHistory
+from price_engine.data_sources.yahoo_finance import YahooFinanceAPI
+
 
 import streamlit as st
 
@@ -39,7 +53,6 @@ if "page" not in st.session_state:
     st.session_state.page = "main"
 
 
-tracker = SentimentTracker()
 
 SESSION_HISTORY_FILE = os.path.join(os.path.dirname(__file__), "session_history.json")
 
@@ -91,7 +104,12 @@ def save_completed_session(trader, symbols, initial_capital, runtime):
             "PnL": float(summary["final_pnl"]),
             "Cash Balance": float(summary["cash_balance"]),
             "Unrealized PnL": float(summary["unrealized_pnl"]),
-            "Duration (s)": int(runtime)
+            "Duration (s)": int(runtime),
+            "Mode": (
+                "Sentiment-Based"
+                if isinstance(trader, RealTimeSentimentTrader)
+                else "Trend-Breakout"
+            )
         }
         
         st.write("Debug - Session Info:", session_info)  # Debug output
@@ -337,7 +355,7 @@ def display_symbol_performance(history_df):
 
 # --- Fixed Email utility function ---
 
-def send_email_with_chart(summary, logs, fig, recipient="divyanshuydv0002@gmail.com"):
+def send_email_with_chart(summary, logs, fig, recipient="arupravy3@gmail.com"):
     sender_email = "alert.realworld@gmail.com"
     subject = "📈 Final Trading Profit and Loss Report"
 
@@ -463,31 +481,56 @@ if 'trader' not in st.session_state:
     st.session_state.session_saved = False
     st.session_state.is_running = False
 
-page = st.sidebar.radio("🧭 Select Mode", ["Real-Time Trading", "Backtesting"])
+page = st.sidebar.radio("🧭 Select Mode", ["Real-Time Trading", "Backtesting", "Price Engine"])
 
 if page == "Real-Time Trading":
     st.session_state.page = "trading"
-else:
+
+elif page == "Backtesting":
     st.session_state.page = "backtest"
+
+elif page == "Price Engine":
+    st.session_state.page = "price_engine"
 
 
 # Sidebar config
 # === Real-Time Trading UI ===
 if st.session_state.page == "trading":
     st.sidebar.title("⚙️ Trading Configuration")
-    initial_capital = st.sidebar.number_input("Initial Capital ($)", min_value=1000, value=10000)
-    runtime = st.sidebar.number_input("Runtime (seconds)", min_value=1, value=300, step=10)
+    
+    # — new sentiment toggle —
+    sentiment_on = st.sidebar.checkbox(
+        "Enable Sentiment-Based Filtering",
+        value=False,
+        key="sentiment_on",
+        help="If on, only trade when EMA sentiment crosses your thresholds"
+    )
+
     symbols = st.sidebar.multiselect(
         "Symbols to Track",
-        ["BTCUSDT", "ETHUSDT", "BNBUSDT", "SOLUSDT"],
-        default=["BTCUSDT", "ETHUSDT"]
+        ["BTCUSDT", "ETHUSDT", "DOGEUSDT", "SOLUSDT", "BNBUSDT", "ADAUSDT", "XRPUSDT", 
+        "MATICUSDT", "LTCUSDT", "DOTUSDT", "TRXUSDT", "LINKUSDT", "AVAXUSDT",
+        "MKRUSDT", "FTMUSDT", "GALAUSDT", "OPUSDT", "ETHBTC"],
+        default=["BTCUSDT", "ETHUSDT"],
+        key="symbols"
     )
+
+    initial_capital = st.sidebar.number_input("Initial Capital ($)", min_value=1000, value=10000)
+    runtime = st.sidebar.number_input("Runtime (seconds)", min_value=1, value=300, step=10)
 
     # Start button
     if st.sidebar.button("▶️ Start Trading") and not st.session_state.is_running:
         with st.spinner("🚀 Starting trading session..."):
-            if st.session_state.trader is None:
-                st.session_state.trader = RealTimeTrader(capital=initial_capital, runtime=runtime)
+            TraderClass = (
+                RealTimeSentimentTrader if st.session_state.sentiment_on
+                else RealTimeTrader
+            )
+            st.session_state.trader = TraderClass(
+                capital=initial_capital,
+                runtime=runtime,
+                long_thresh=0.20,
+                short_thresh=-0.10
+            )
 
             if st.session_state.runner_thread is None or not st.session_state.runner_thread.is_alive():
                 st.session_state.runner_thread = threading.Thread(
@@ -601,86 +644,129 @@ if st.session_state.page == "trading":
             # st.write("DEBUG - completed_runs:", st.session_state.get("completed_runs", "Not Found"))
             
             #Sentiment
-            st.markdown("---")
-            news_data = fetch_marketaux_news(symbols="TSLA", limit=4)
-            for article in news_data:
-                title = article.get("title")
-                sentiment = get_sentiment(title)
-                tracker.update(sentiment, title)
+            st.subheader("📰 Sentiment Analysis of the latest news")
 
-            # Display live scores
-            st.metric("📈 Avg Sentiment Score", round(tracker.get_average_sentiment(), 3))
+            # instantiate once per session
+            analyzer = EnhancedSentimentAnalyzer(use_transformer=False)
+            tracker  = SmoothedSentimentTracker(max_len=100, ema_alpha=0.3)
 
-            # Show table of recent news
-            st.subheader("📰 Latest Headlines with Sentiment")
-            for item in tracker.get_history():
-                st.write(f"**{item['headline']}**")
-                st.write(f"🕒 {item['timestamp']} — Sentiment: `{item['score']}`")
-                st.markdown("---")
-                
+            def extract_crypto_symbols(usdt_pairs):
+                return list(set([s.replace("USDT", "") for s in usdt_pairs if s.endswith("USDT")]))
 
-            if st.session_state.completed_runs:
-                st.subheader("📊 Session History")
-                history_df = pd.DataFrame(st.session_state.completed_runs)
-                st.dataframe(history_df)
+            try:
+                selected_symbols = st.session_state.get("symbols", [])
+                crypto_keywords = extract_crypto_symbols(selected_symbols)
+                currencies = ",".join(crypto_keywords) if crypto_keywords else "BTC,ETH"
 
-                st.subheader("📈 Portfolio Performance Timeline")
-                display_portfolio_timeline(
-                    st.session_state.completed_runs,
-                    title="Trading Performance",
-                    height=600,
-                    line_color="#00CC96",
-                    colorscale="Viridis",
-                    padding=dict(l=50, r=50, t=100, b=50),
-                    show_dataframe=True
+                news_items = fetch_cryptopanic_news( 
+                    filter="trending",
+                    limit=5,
+                    currencies=currencies
                 )
 
-                display_symbol_performance(history_df)
+                # score & update history
+                for post in news_items:
+                    title = post.get("title", "")
+                    # cryptopanic tags are dicts, so extract slug or name:
+                    tags  = [t.get("slug", "") for t in post.get("tags", [])]
+                    score = analyzer.compute_sentiment(title, tags)
+                    tracker.update(score, title)
 
-                
+                st.metric("📊 Raw Avg Sentiment", round(tracker.get_average_sentiment(), 3))
+                st.metric("📉 EMA Sentiment",     round(tracker.get_ema_sentiment(),     3))
 
-            st.stop()
+                st.markdown("### 🧾 Latest Headlines with Sentiment")
+                for post, item in zip(news_items, tracker.get_history()[-len(news_items):]):
+                    emoji  = "🟢" if item["score"] > 0.3 else "🟡" if item["score"] > 0 else "🔴"
+                    source = post.get("source", {}).get("title", "Unknown")
+                    st.write(f"**{emoji} {item['headline']}**")
+                    st.caption(
+                        f"🕒 {item['timestamp']} — Source: {source} — Sentiment: {item['score']:.4f}"
+                    )
+                    st.markdown("---")
+
+                if st.session_state.completed_runs:
+                    st.subheader("📊 Session History")
+                    history_df = pd.DataFrame(st.session_state.completed_runs)
+                    st.dataframe(history_df)
+
+                    st.subheader("📈 Portfolio Performance Timeline")
+                    display_portfolio_timeline(
+                        st.session_state.completed_runs,
+                        title="Trading Performance",
+                        height=600,
+                        line_color="#00CC96",
+                        colorscale="Viridis",
+                        padding=dict(l=50, r=50, t=100, b=50),
+                        show_dataframe=True
+                    )
+                    display_symbol_performance(history_df)
+
+                st.stop()
+
+            except Exception as e:
+                st.warning(f"Could not load CryptoPanic news: {e}")
 
     # Active trading UI - ONLY show if trader exists
 
     if st.session_state.is_running and st.session_state.trader:
         trader = st.session_state.trader
 
-        if st.session_state.trader and st.sidebar.checkbox("Show Debug Info"):
+        st.sidebar.checkbox("Show Debug Info", key="show_debug")
+
+        # 2) Only debug info lives inside this guard
+        if st.session_state.show_debug:
             st.sidebar.subheader("🧑‍💻 Trader State Validation")
-            validation = st.session_state.trader.validate_state()
-            
+            val = trader.validate_state()
             st.sidebar.json({
-                "Status": "🟢 ACTIVE" if validation['is_active'] else "🔴 INACTIVE",
-                "Runtime": f"{validation['last_update']:.1f}s",
-                "Open Positions": validation['positions'],
+                "Status":        "🟢 ACTIVE" if val["is_active"] else "🔴 INACTIVE",
+                "Runtime":       f"{val['last_update']:.1f}s",
+                "Open Positions": val["positions"],
                 "Thread Status": "Alive" if st.session_state.runner_thread.is_alive() else "Dead"
             })
-            
-            if st.sidebar.button("Force Refresh State"):
-                st.rerun()
+            if st.sidebar.button("Force Refresh State", key="force_refresh"):
+                st.experimental_rerun()
 
-        # Time remaining display
-        elapsed = int(time.time() - trader.start_time)
-        remaining = max(runtime - elapsed, 0)
+        # 3) If you have sentiment trader, show its live EMA
+        if isinstance(trader, RealTimeSentimentTrader):
+            st.sidebar.metric(
+                "📉 Live EMA Sentiment",
+                f"{trader.get_sentiment_ema():.3f}"
+            )
+
+        # 4) These two always display exactly once
+        elapsed   = int(time.time() - trader.start_time)
+        remaining = max(trader.runtime - elapsed, 0)
         st.sidebar.metric("⏳ Time Remaining", f"{remaining} sec")
 
+        # 5) **Session timeout → show summary**
         if remaining <= 0:
-            st.warning("Session completed - preparing summary...")
+            st.warning("Session completed - preparing summary…")
             time.sleep(1)
-            st.rerun()
+            st.rerun()              # rerun back into your summary branch
 
-        if time.time() - getattr(trader, 'last_save_time', 0) > 300:  # Auto-save every 5 minutes
+        # 6) **Auto-save every 5 minutes**
+        if time.time() - getattr(trader, "last_save_time", 0) > 300:
             save_history(st.session_state.completed_runs)
             trader.last_save_time = time.time()
 
-        # --- Main UI ---
+        if st.sidebar.button("🔄 Reset Session", key="reset_session"):
+            st.session_state.trader        = None
+            st.session_state.runner_thread = None
+            st.session_state.is_running    = False
+            st.session_state.show_summary  = False
+            st.session_state.last_summary  = {}
+            st.session_state.last_logs     = []
+            st.session_state.last_timeline = []
+            st.rerun()
+
+        # --- now your main UI continues below ---
         st.title("♞ The Real World Trading Engine")
         st.subheader("📊 Real-Time Trading Dashboard")
 
 
         # Portfolio Summary
-        col1, col2, col3, col4 = st.columns(4)
+        col1, col2, col3, col4 = st.columns([2,2,1,2])
         with col1:
             st.metric("💼 Initial Capital", f"${trader.initial_capital:,.2f}")
         with col2:
@@ -691,6 +777,7 @@ if st.session_state.page == "trading":
         with col4:
             portfolio_value = trader.cash_balance + unrealized
             st.metric("📊 Current Portfolio Value", f"${portfolio_value:,.2f}")
+        
 
         # PnL Chart
         expected_keys = {"timestamp", "portfolio_value"}
@@ -717,6 +804,45 @@ if st.session_state.page == "trading":
                                 height=450
                             )
         st.plotly_chart(fig, use_container_width=True)
+
+        # Safely retrieve symbols from session_state
+
+        if st.session_state.sentiment_on \
+            and isinstance(trader, RealTimeSentimentTrader) \
+            and st.session_state.symbols:
+
+            st.subheader("🔎 Symbol-Level Sentiment Breakdown")
+            cols = st.columns(len(st.session_state.symbols))
+            analyzer = EnhancedSentimentAnalyzer(use_transformer=False)
+
+            for i, sym in enumerate(st.session_state.symbols):
+                tracker_sym = SentimentTracker(max_len=20, ema_alpha=0.3)
+                posts = fetch_cryptopanic_news(
+                    filter="trending", limit=5, currencies=sym.replace("USDT","")
+                ) or []
+                for post in posts:
+                    title = post["title"]
+                    tags  = [t.get("slug","") for t in post.get("tags",[])]
+                    tracker_sym.update(analyzer.compute_sentiment(title,tags), title)
+
+                cols[i].metric(
+                    sym,
+                    f"Avg: {tracker_sym.get_average_sentiment():.3f}",
+                    f"EMA: {tracker_sym.get_ema_sentiment():.3f}"
+                )
+
+            # Live EMA Sentiment Chart (overall)
+            st.subheader("📈 EMA Sentiment Over Time")
+            history = trader.tracker.get_history()
+            if history:
+                df = pd.DataFrame(history)
+                df["timestamp"] = pd.to_datetime(df["timestamp"])
+                df = df.set_index("timestamp")
+                plot_df = pd.DataFrame({
+                    "Raw": df["score"],
+                    "EMA": df["score"].ewm(alpha=trader.tracker.ema_alpha).mean()
+                })
+                st.line_chart(plot_df, use_container_width=True)
 
         # Open Positions
         if trader.positions:
@@ -776,16 +902,6 @@ if st.session_state.page == "trading":
         st.session_state.last_logs = trader.logs.copy()
         st.session_state.last_timeline = trader.pnl_timeline.copy()
 
-        # Reset
-        if st.sidebar.button("🔄 Reset Session"):
-            st.session_state.trader = None
-            st.session_state.runner_thread = None
-            st.session_state.show_summary = False
-            st.session_state.last_summary = {}
-            st.session_state.last_logs = []
-            st.session_state.last_timeline = []
-            st.rerun()
-
         # Auto-refresh
         time.sleep(1)
         st.rerun()
@@ -803,55 +919,506 @@ if st.session_state.page == "trading":
 
 # === Backtesting UI ===
 elif st.session_state.page == "backtest":
-    st.title("📊 Backtesting Interface")
+    st.title("🧠 Backtesting Interface")
 
-    symbols_input = st.text_input("Enter symbols (comma-separated)", value="BTCUSDT,ETHUSDT")
-    allocations_input = st.text_input("Enter allocations (%) for each symbol", value="60,40")
-    start_date = st.date_input("Start Date")
-    end_date = st.date_input("End Date")
+    # Sidebar config for backtesting
+    st.sidebar.title("🧠 Backtesting Configuration")
+
+    bt_initial_capital = st.sidebar.number_input("Initial Capital ($)", min_value=1000, value=100000, step=1000)
+    asset_type = st.sidebar.radio("Select Asset Type", ["crypto", "stock"], horizontal=True)
+ 
+    # Full list of all symbols (crypto and stocks)
+    all_symbols = [
+        # Crypto
+        "BTCUSDT", "ETHUSDT", "BNBUSDT", "SOLUSDT", "DOGEUSDT", "ADAUSDT", "XRPUSDT", "LTCUSDT", "DOTUSDT", 
+        "MATICUSDT", "LINKUSDT", "TRXUSDT", "AVAXUSDT", "SHIBUSDT", "FTMUSDT", "NEARUSDT", "AAVEUSDT", "ALGOUSDT", 
+        "GRTUSDT", "FILUSDT", "STXUSDT", "FTTUSDT", "XLMUSDT", "LUNAUSDT", "CROUSDT", "ZRXUSDT", "OCEANUSDT", 
+        "SUSHIUSDT", "EGLDUSDT", "KSMUSDT", "MKRUSDT", "MANAUSDT", "SANDUSDT", "AUDIOUSDT", "DODOUSDT", "ZECUSDT", 
+        "BANDUSDT", "RUNEUSDT", "CVCUSDT", "LENDUSDT", "STPTUSDT", "BNTUSDT", "SNTUSDT", "CRVUSDT", "YFIUSDT", 
+        "1INCHUSDT", "COMPUSDT", "UNFIUSDT", "SPELLUSDT", "MASKUSDT", "KNCUSDT", "FARMUSDT", "MITHUSDT", "FLOKIUSDT", 
+    
+        # Stocks
+        "AAPL", "MSFT", "GOOGL", "AMZN", "TSLA", "META", "NVDA", "NFLX", "BRK.B", "JPM", "V", "WMT", "BA", 
+        "DIS", "PYPL", "BABA", "UBER", "SNAP", "SHOP", "INTC", "AMD", "NVDA", "CSCO", "ORCL", "SPY", "SP500", 
+        "DIA", "IWM", "QQQ", "XOM", "CVX", "GE", "KO", "PEP", "MCD", "JNJ", "PG", "NKE", "HD", "LOW", "MS", 
+        "GS", "C", "BMO", "TD", "RBC", "WFC", "AXP", "MA", "SQ", "GOOG", "LULU", "VZ", "T", "GS", "BA", "COST", 
+        "AMAT", "LRCX", "CAT", "ADM", "MMM", "RTX", "HON", "TXN", "AVGO", "PFE", "MRK", "MDT", "ABBV", "AMGN", 
+        "BIIB", "ISRG", "GILD", "SYK", "REGN", "VRTX", "VEEV", "IQV", "IDXX", "RMD", "TMO", "ABT", "ZBH", 
+        "COO", "SYF", "HUM", "UNH", "CVS", "ANTM", "MCK", "WBA", "TGT", "FISV", "CME", "ICE", "NDAQ", "MSCI", 
+        "SPGI", "LMT", "RTX", "HII", "NOC", "GD", "HUM", "CNC", "KHC", "K", "PG", "NKE", "TGT"
+    ]
+
+    # Show popular symbols first
+    popular_symbols = [
+        "BTCUSDT", "ETHUSDT", "BNBUSDT", "SOLUSDT", "DOGEUSDT", "AAPL", "MSFT", "GOOGL", "AMZN", "TSLA", 
+        "META", "NVDA", "NFLX", "BRK.B", "JPM", "V", "WMT"
+    ]
+
+    # Dropdown menu for popular symbols
+    selected_symbols = st.sidebar.multiselect(
+        "Select Symbols to Backtest (Popular)",
+        options=popular_symbols,
+        default=["BTCUSDT", "ETHUSDT"]
+    )
+
+    # Text input for custom symbols
+    custom_symbols = st.sidebar.text_input("Or Enter Custom Symbols (comma-separated)", "")
+
+    # Combine custom symbols with popular symbols
+    if custom_symbols:
+        custom_symbol_list = [symbol.strip().upper() for symbol in custom_symbols.split(",")]
+        selected_symbols = list(set(selected_symbols) | set(custom_symbol_list))
+
+    start_date = st.sidebar.date_input("Start Date", datetime.date(2023, 1, 1))
+    end_date = st.sidebar.date_input("End Date", datetime.date(2024, 1, 1))
+
     strategy = st.selectbox("Select Strategy", options=["bollinger", "mean_reversion", "trendpullback"])
 
-    run_btn = st.button("🚀 Run Backtest")
+    default_allocations = [round(100 / len(selected_symbols), 2) for _ in selected_symbols] if selected_symbols else []
+
+    allocations_input = st.sidebar.text_input(
+        "Allocations (%) for each symbol (comma-separated)",
+        value=",".join(map(str, default_allocations)) if default_allocations else ""
+    )
+
+    run_btn = st.sidebar.button("🚀 Run Backtest")
 
     if run_btn:
-        try:
-            symbols = [s.strip().upper() for s in symbols_input.split(",")]
-            allocations = list(map(float, allocations_input.split(",")))
+        if not selected_symbols:
+            st.warning("⚠️ Please select at least one symbol.")
+        else:
+            try:
+                # Parse allocations and validate
+                allocations = list(map(float, allocations_input.split(",")))
 
-            if len(symbols) != len(allocations):
-                st.error("❌ Number of symbols must match number of allocations.")
-            elif round(sum(allocations), 2) != 100.0:
-                st.error("❌ Allocations must sum to 100%.")
+                if len(allocations) != len(selected_symbols):
+                    st.error("❌ Number of allocations must match number of selected symbols.")
+                elif round(sum(allocations), 2) != 100.0:
+                    st.error("❌ Allocations must sum to 100%.")
+                else:
+                    with st.spinner("Running backtest..."):
+                        results = run_backtest_for_ui(
+                            symbols=selected_symbols,
+                            allocations=allocations,
+                            start=start_date.strftime("%Y-%m-%d"),
+                            end=end_date.strftime("%Y-%m-%d"),
+                            strategy=strategy,
+                            initial_capital=bt_initial_capital,
+                            asset_type=asset_type  # ✅ add this
+                        )
+
+
+                        st.success("✅ Backtest Complete!")
+                        st.metric("Initial Capital", f"${results['initial_capital']:,}")
+                        st.metric("Final Net Worth", f"${results['final_net_worth']:,.2f}")
+                        st.metric("Total Return", f"{results['total_return']:.2f}%")
+                        st.metric("Total Trades", results["total_trades"])
+
+                        st.subheader("📊 Per-Symbol Performance")
+                        st.dataframe(results["per_symbol_logs"])
+
+                        st.subheader("🧾 Trade Log")
+                        st.dataframe(results["trade_log_df"])
+
+                        if results["pnl_chart_data"] is not None:
+                            st.line_chart(results["pnl_chart_data"])
+
+                        # === 📊 Interactive Bar: Per Symbol Final Net Worth ===
+                        st.subheader("📊 Per-Symbol Final Net Worth")
+                        per_symbol_df = pd.DataFrame(results["per_symbol_logs"])
+                        per_symbol_fig = go.Figure()
+
+                        for symbol in selected_symbols:
+                            symbol_data = per_symbol_df[per_symbol_df["symbol"] == symbol]
+                            per_symbol_fig.add_trace(go.Bar(
+                                x=[symbol],
+                                y=symbol_data["final_net_worth"],
+                                name=symbol
+                            ))
+
+                        per_symbol_fig.update_layout(
+                            title="Final Net Worth per Symbol",
+                            xaxis_title="Symbols",
+                            yaxis_title="Final Net Worth",
+                            barmode="group"
+                        )
+                        st.plotly_chart(per_symbol_fig, use_container_width=True)
+
+                        # === 📈 PnL Over Time (Cleaned Layout) ===
+                        if results.get("pnl_chart_data") is not None:
+                            st.subheader("📉 PnL Over Time")
+                            pnl_fig = go.Figure()
+                            pnl_fig.add_trace(go.Scatter(
+                                x=results["pnl_chart_data"].index,
+                                y=results["pnl_chart_data"],
+                                mode="lines+markers",
+                                name="Net Worth"
+                            ))
+                            pnl_fig.update_layout(
+                                title="Portfolio Net Worth Over Time",
+                                xaxis_title="Date",
+                                yaxis_title="Net Worth ($)"
+                            )
+                            st.plotly_chart(pnl_fig, use_container_width=True)
+                            
+
+                        # === 🔥 Trade Volume Heatmap ===
+                        st.subheader("🔥 Trade Volume Heatmap")
+                        if not results["trade_log_df"].empty:
+                            trade_counts = results["trade_log_df"].groupby(["symbol", "action"]).size().unstack(fill_value=0)
+                            heatmap_fig = go.Figure(data=go.Heatmap(
+                                z=trade_counts.values,
+                                x=trade_counts.columns.tolist(),
+                                y=trade_counts.index.tolist(),
+                                colorscale="Viridis"
+                            ))
+                            heatmap_fig.update_layout(
+                                xaxis_title="Action",
+                                yaxis_title="Symbol",
+                                title="Trade Volume Heatmap (Buy/Sell Frequency)"
+                            )
+                            st.plotly_chart(heatmap_fig, use_container_width=True)
+                        else:
+                            st.info("No trades were executed, so heatmap is not available.")
+
+            except Exception as e:
+                st.error(f"❌ Error during backtest: {e}")
+
+# 🧠 Price Engine Dashboard
+elif st.session_state.page == "price_engine":
+
+    from price_engine.indicators.bollinger_bands import BollingerBands
+    from price_engine.indicators.mean_reversion import MeanReversion
+    from price_engine.indicators.enhanced_mean_reversion import EnhancedMeanReversion
+
+    from price_engine.data_sources import (
+        binance_api,
+        yahoo_finance,
+        coingecko_api,
+        kraken_api,
+        coinbase_api
+    )
+
+
+
+    st.title("⚙️ Price Engine Dashboard")
+
+    # === UI Elements ===
+
+    # Popular stock symbols
+    stock_symbols = [
+        "AAPL", "MSFT", "GOOGL", "AMZN", "TSLA", "META", "NVDA", "NFLX", "INTC", "AMD",
+        "SPY", "QQQ", "BABA", "V", "PYPL", "DIS", "BA", "IBM", "GS", "WMT", "XOM"
+    ]
+
+    # Popular crypto symbols
+    crypto_symbols = [
+        "BTCUSDT", "ETHUSDT", "DOGEUSDT", "SOLUSDT", "BNBUSDT", "ADAUSDT", "XRPUSDT", 
+        "MATICUSDT", "LTCUSDT", "DOTUSDT", "TRXUSDT", "LINKUSDT", "AVAXUSDT",
+        "MKRUSDT", "FTMUSDT", "GALAUSDT", "OPUSDT", "ETHBTC"
+    ]
+
+    # Streamlit UI components
+    symbol = st.selectbox("Select Symbol", stock_symbols + crypto_symbols)
+    asset_type = st.radio("💼 Select Asset Type", ["stock", "crypto"], horizontal=True)
+
+    mode = st.radio("⚙️ Select Mode", [
+        "Live (Aggregated + Indicators)",
+        "API Live (Polling)",
+        "WebSocket Live (Binance)",
+        "Historical (with optional plot)",
+        "Live Plot"  # ✅ Added here
+    ])
+
+    # Additional controls for Historical Mode
+    if mode == "Historical (with optional plot)":
+        from_date = st.date_input("📅 From Date", value=date(2024, 1, 1))
+        to_date = st.date_input("📅 To Date", value=date.today())  # ✅ Automatically today
+        show_plot = st.checkbox("📊 Show Plot", value=True)
+
+
+    # Additional controls for Live Plot mode
+    if mode == "Live Plot":
+        selected_symbols = st.multiselect("🧵 Select Symbols", stock_symbols + crypto_symbols, default=["BTCUSDT"])
+        duration_seconds = st.slider("⏱️ Duration (seconds)", min_value=30, max_value=300, value=120, step=10)
+
+    st.markdown("---")
+
+
+    # === Logic for Each Mode ===
+
+    def run_aggregated_live(symbol, asset_type):
+        st.subheader(f"🔁 Aggregated Live Price: {symbol}")
+
+        # Get aggregated price and all source prices
+        price, source_prices = aggregate_price(symbol, asset_type)
+
+
+        if price:
+            # Display individual source prices
+            st.text(f"Live Prices for {symbol} from all sources:")
+            for source, p in source_prices.items():
+                st.text(f"{source}: {p}")
+            st.success(f"Weighted Average Price: ${round(price, 4)}")
+        else:
+            st.error("Failed to aggregate price.")
+
+        st.subheader("📈 Indicators")
+        dummy_prices = [{"price": price}] * 30 if price else [{"price": 0}] * 30
+
+        # Bollinger Bands
+        bb_indicator = BollingerBands()
+        bb = bb_indicator.calculate(dummy_prices)
+
+        # Mean Reversion
+        mr_indicator = MeanReversion(window=20, threshold=2.0)
+        mr = mr_indicator.calculate(dummy_prices)
+
+        mean_reversion_status = (
+            "Overbought" if mr["overbought"] else
+            "Oversold" if mr["oversold"] else
+            "Neutral"
+        )
+
+        # Enhanced Mean Reversion
+        emr_indicator = EnhancedMeanReversion(window=20)
+        emr_action = emr_indicator.decide(dummy_prices, current_position="none", asset_name=symbol)
+
+        emr_status = {
+            "buy": "Buy signal",
+            "sell": "Sell signal",
+            "short": "Short signal",
+            "cover": "Cover short signal"
+        }.get(emr_action, "No action")
+
+        # Display
+        st.write("**Bollinger Bands:**", bb)
+        st.write("**Mean Reversion Status:**", mean_reversion_status)
+        st.write("**Enhanced Mean Reversion Action:**", emr_status)
+
+    from price_engine.data_sources.yahoo_finance import YahooFinanceAPI
+    yahoo_finance = YahooFinanceAPI()  # ✅ Create an instance
+    from price_engine.data_sources.binance_api import BinanceAPI
+    from price_engine.data_sources.coingecko_api import CoinGeckoAPI
+    from price_engine.data_sources.kraken_api import KrakenAPI
+    from price_engine.data_sources.coinbase_api import CoinbaseAPI
+
+    binance_api = BinanceAPI()
+    coingecko_api = CoinGeckoAPI()
+    kraken_api = KrakenAPI()
+    coinbase_api = CoinbaseAPI()
+
+
+    def run_api_live(symbol, asset_type):
+        st.subheader(f"🌐 API Live Price Stream: {symbol}")
+
+        # Use only relevant sources
+        if asset_type == "crypto":
+            source_order = [binance_api, coingecko_api, kraken_api, coinbase_api]
+        else:
+            source_order = [yahoo_finance]
+
+        latest_box = st.empty()
+        log_box = st.empty()  # ✅ Use this for clean overwrite
+
+        price_log = []
+        last_price = None
+
+        for _ in range(30):  # ~2.5 minutes
+            price = None
+            for source in source_order:
+                try:
+                    fetched_price = source.get_price(symbol)
+                    if fetched_price is not None:
+                        price = fetched_price
+                        break
+                except Exception as e:
+                    st.error(f"{source.__class__.__name__} failed: {e}")
+
+            timestamp = datetime.datetime.now().strftime('%H:%M:%S')
+
+            if price is not None:
+                # Compare with previous price
+                if last_price is None:
+                    emoji = "🟢"
+                elif price > last_price:
+                    emoji = "📈"
+                elif price < last_price:
+                    emoji = "📉"
+                else:
+                    emoji = "➖"
+
+                last_price = price
+                line = f"{emoji} {timestamp} — Price: ${round(price, 4)}"
+                price_log.insert(0, line)
+
+                # Latest price in green
+                latest_box.success(line)
             else:
-                st.info("Running backtest... please wait.")
-                results = run_backtest_for_ui(
-                    symbols=symbols,
-                    allocations=allocations,
-                    start=start_date.strftime("%Y-%m-%d"),
-                    end=end_date.strftime("%Y-%m-%d"),
-                    strategy=strategy,
-                )
+                latest_box.warning("Could not fetch price from any source.")
 
-                st.success("✅ Backtest Complete!")
-                st.metric("Initial Capital", f"${results['initial_capital']:,}")
-                st.metric("Final Net Worth", f"${results['final_net_worth']:.2f}")
-                st.metric("Total Return", f"{results['total_return']:.2f}%")
-                st.metric("Total Trades", results["total_trades"])
+            # Display log cleanly
+            log_html = (
+                "<h4>🧾 Price Log</h4>"
+                "<div style='max-height: 400px; overflow-y: auto; padding-right:10px;'>"
+                + "".join(f"<p style='margin:0'>{entry}</p>" for entry in price_log)
+                + "</div>"
+            )
+            log_box.markdown(log_html, unsafe_allow_html=True)
 
-                st.subheader("📊 Per-Symbol Performance")
-                st.dataframe(results["per_symbol_logs"])
-
-                st.subheader("🧾 Trade Log")
-                st.dataframe(results["trade_log_df"])
-
-                if results["pnl_chart_data"] is not None:
-                    st.line_chart(results["pnl_chart_data"])
-
-        except Exception as e:
-            st.error(f"❌ Error during backtest: {e}")
+            time.sleep(5)
 
 
 
+
+    def run_ws_live(symbol):
+        st.subheader(f"📡 Binance WebSocket Price Stream for {symbol}")
+
+        st.warning("⚠️ WebSocket mode requires a persistent connection and is not supported directly in Streamlit.")
+
+        st.markdown("""
+        #### 🛠️ To run this mode, use the command line:
+        ```bash
+        python src/main.py --mode ws-live --symbol %s --asset-type crypto
+        ```
+        """ % symbol)
+
+        st.markdown("""
+        ✅ This will open a live Binance WebSocket connection and stream real-time prices directly in your terminal.
+        """)
+
+    def run_historical(symbol, asset_type, from_date, to_date, show_plot):
+        st.subheader(f"🕰️ Historical Data: {symbol}")
+        st.markdown(f"Selected range: **{from_date} → {to_date}**")
+
+        df = None
+
+        if asset_type == "crypto":
+            # Load from prices.json
+            history = PriceHistory("prices.json")
+            data = pd.DataFrame(history.get_history())
+
+            data = data[data["symbol"] == symbol]
+            if data.empty:
+                st.error("No historical data found for this crypto symbol.")
+                return
+
+            data["timestamp"] = pd.to_datetime(data["timestamp"])
+            data = data[(data["timestamp"].dt.date >= from_date) &
+                        (data["timestamp"].dt.date <= to_date)]
+
+            if data.empty:
+                st.error("No data found in the selected date range.")
+                return
+
+            df = data.rename(columns={"timestamp": "date"}).sort_values("date").reset_index(drop=True)
+
+        elif asset_type == "stock":
+            # Use Yahoo live historical fetch
+            yahoo = YahooFinanceAPI()
+            records = yahoo.get_historical_prices(symbol, str(from_date), str(to_date))
+            if not records:
+                st.error("No data returned from Yahoo Finance.")
+                return
+            df = pd.DataFrame(records)
+            df["date"] = pd.to_datetime(df["date"])
+
+        else:
+            st.error("Unsupported asset type.")
+            return
+
+        
+        # Display full data in selected range
+        st.markdown("### 📋 Historical Data")
+        st.dataframe(df, use_container_width=True)
+
+
+        if "price" in df.columns:
+            df['bb'] = df['price'].rolling(window=20).mean()
+            df['mr'] = df['price'].rolling(window=10).mean()
+
+            if show_plot:
+                st.markdown("### 📊 Price with Indicators")
+                st.line_chart(df.set_index("date")[["price", "bb", "mr"]])
+
+        st.markdown("### 📈 Summary Stats")
+        st.write(df["price"].describe())
+
+    def run_live_plot(selected_symbols, asset_type, duration_seconds):
+        st.subheader("📊 Real-Time Live Plot")
+
+        if asset_type == "crypto":
+            source_order = [binance_api, coingecko_api, kraken_api, coinbase_api]
+        else:
+            source_order = [yahoo_finance]
+
+        plot_placeholder = st.empty()
+        stop_button = st.button("⏹ Stop Plot")
+
+        # Use session state to manage stopping
+        if "stop_plot" not in st.session_state:
+            st.session_state.stop_plot = False
+
+        if stop_button:
+            st.session_state.stop_plot = True
+
+        data_log = {symbol: [] for symbol in selected_symbols}
+
+        start_time = time.time()
+
+        while not st.session_state.stop_plot and (time.time() - start_time) < duration_seconds:
+            now = datetime.datetime.now()
+
+            for symbol in selected_symbols:
+                price = None
+                for source in source_order:
+                    try:
+                        fetched_price = source.get_price(symbol)
+                        if fetched_price is not None:
+                            price = fetched_price
+                            break
+                    except Exception as e:
+                        st.error(f"{source.__class__.__name__} failed for {symbol}: {e}")
+
+                if price is not None:
+                    data_log[symbol].append({"time": now, "price": price})
+
+            # Create the plot
+            fig = go.Figure()
+            for symbol in selected_symbols:
+                df = pd.DataFrame(data_log[symbol])
+                if not df.empty:
+                    fig.add_trace(go.Scatter(x=df["time"], y=df["price"], mode="lines+markers", name=symbol))
+
+            fig.update_layout(title="Live Prices", xaxis_title="Time", yaxis_title="Price")
+            plot_placeholder.plotly_chart(
+                fig,
+                use_container_width=True
+            )
+
+            time.sleep(1)  # Adjustable polling rate
+
+        # Reset stop state
+        st.session_state.stop_plot = False
+
+
+
+
+    # === Execution Trigger ===
+    if st.button("🚀 Run Price Engine"):
+        if mode == "Live (Aggregated + Indicators)":
+            run_aggregated_live(symbol, asset_type)
+        elif mode == "API Live (Polling)":
+            run_api_live(symbol, asset_type)
+        elif mode == "WebSocket Live (Binance)":
+            if asset_type != "crypto":
+                st.error("WebSocket mode is only available for crypto assets.")
+            else:
+                run_ws_live(symbol)
+        elif mode == "Historical (with optional plot)":
+            run_historical(symbol, asset_type, from_date, to_date, show_plot)
+        elif mode == "Live Plot":
+            run_live_plot(selected_symbols, asset_type, duration_seconds)
 
 
 
