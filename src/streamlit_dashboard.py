@@ -557,6 +557,7 @@ if st.session_state.page == "trading":
                 st.session_state.last_summary = trader.get_portfolio_summary()
                 st.session_state.last_logs = trader.get_logs()
                 st.session_state.last_timeline = trader.get_pnl_data()
+                st.session_state.last_price_data = trader.get_price_data()
 
                 save_completed_session(trader, symbols, initial_capital, runtime)
 
@@ -574,6 +575,7 @@ if st.session_state.page == "trading":
             st.session_state.last_summary = trader.get_portfolio_summary()
             st.session_state.last_logs = trader.get_logs()
             st.session_state.last_timeline = trader.get_pnl_data()
+            st.session_state.last_price_data = trader.get_price_data()
             
             save_completed_session(trader, symbols, initial_capital, runtime)
             st.session_state.is_running = False
@@ -591,6 +593,88 @@ if st.session_state.page == "trading":
 
             st.metric("💰 Final Portfolio Value", f"${final_value:,.2f}")
             st.metric("📊 Final Profit/Loss", f"${final_pnl:,.2f}")
+
+            ######################################
+
+            WARMUP_CANDLES = 50
+
+            # Retrieve stored data
+            price_data = st.session_state.last_price_data
+            symbols    = st.session_state.symbols
+
+            # Create one tab per symbol
+            tabs = st.tabs(symbols)
+
+            for tab, symbol in zip(tabs, symbols):
+                with tab:
+                    raw = price_data.get(symbol, [])
+                    df  = pd.DataFrame(raw)
+                    
+                    # Check we have enough candles
+                    if len(df) < WARMUP_CANDLES:
+                        st.warning(f"{symbol}: only {len(df)}/{WARMUP_CANDLES} candles available.")
+                        continue
+                    
+                    # Build a time-indexed DataFrame
+                    df['timestamp'] = pd.to_datetime(df['timestamp'])
+                    df = df.set_index('timestamp').sort_index()
+                    
+                    # Mark the end of warm-up
+                    warm_end = df.index[WARMUP_CANDLES - 1]
+                    
+                    # Build the candlestick figure
+                    fig = go.Figure()
+                    
+                    # 1) Warm-up candles in gray
+                    fig.add_trace(go.Candlestick(
+                        x=df.index[:WARMUP_CANDLES],
+                        open=df['open'][:WARMUP_CANDLES],
+                        high=df['high'][:WARMUP_CANDLES],
+                        low=df['low'][:WARMUP_CANDLES],
+                        close=df['close'][:WARMUP_CANDLES],
+                        increasing_line_color='gray',
+                        decreasing_line_color='gray',
+                        name='Warm-up'
+                    ))
+                    
+                    # 2) Live candles in green/red
+                    fig.add_trace(go.Candlestick(
+                        x=df.index[WARMUP_CANDLES:],
+                        open=df['open'][WARMUP_CANDLES:],
+                        high=df['high'][WARMUP_CANDLES:],
+                        low=df['low'][WARMUP_CANDLES:],
+                        close=df['close'][WARMUP_CANDLES:],
+                        increasing_line_color='lightgreen',
+                        decreasing_line_color='tomato',
+                        name='Live'
+                    ))
+                    
+                    # 3) Optional translucent shading over the warm-up region
+                    fig.add_vrect(
+                        x0=df.index[0],
+                        x1=warm_end,
+                        fillcolor="LightSalmon",
+                        opacity=0.2,
+                        layer="below",
+                        line_width=0
+                    )
+                    
+                    # Final layout tweaks
+                    fig.update_layout(
+                        title=f"🕯️ {symbol} Candlesticks (Warm-up + Live)",
+                        xaxis_title="Time",
+                        yaxis_title="Price",
+                        template="plotly_dark",
+                        height=400
+                    )
+                    
+                    # Render inside the tab
+                    st.plotly_chart(fig, use_container_width=True)
+
+
+
+            ###############################
+            
 
             # Generate chart from saved timeline
             pnl_df = pd.DataFrame(st.session_state.last_timeline)
@@ -711,6 +795,19 @@ if st.session_state.page == "trading":
 
     if st.session_state.is_running and st.session_state.trader:
         trader = st.session_state.trader
+
+        WARMUP_CANDLES = 50
+        symbol = st.session_state.symbols[0]  # or whichever you want to monitor
+        data_len = len(trader.data.get(symbol, []))
+
+        progress_slot = st.empty()
+        if data_len < WARMUP_CANDLES:
+            # update the bar
+            progress_slot.progress(data_len / WARMUP_CANDLES)
+            st.info(f"⏳ Warming up… {data_len}/{WARMUP_CANDLES} candles collected.")
+        else:
+            # remove it once we're done
+            progress_slot.empty()
 
         st.sidebar.checkbox("Show Debug Info", key="show_debug")
 
